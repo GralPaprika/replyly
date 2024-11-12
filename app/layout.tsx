@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
-import { Plus_Jakarta_Sans as PlusJakartaSansFont } from "next/font/google";
+import { Plus_Jakarta_Sans as PlusJakartaSansFont } from 'next/font/google';
 
-import "@radix-ui/themes/styles.css";
+import '@radix-ui/themes/styles.css';
 import './styles/globals.css';
 
 import { Providers } from '@/components/Providers';
 
-const plusJakartaSans = PlusJakartaSansFont({ subsets: ["latin"] });
+const plusJakartaSans = PlusJakartaSansFont({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Replyly - Atiende a tus clientes 24/7 Siempre en linea',

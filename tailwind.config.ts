@@ -55,6 +55,9 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        replyly: {
+          DEFAULT: "hsl(var(--replyly))",
+        }
       },
       borderRadius: {
         lg: "var(--radius)",

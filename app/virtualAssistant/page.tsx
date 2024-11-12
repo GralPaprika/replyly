@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import { Flex } from '@radix-ui/themes';
 import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
+import { IconArrowLeft, IconSettings } from '@tabler/icons-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -10,14 +10,11 @@ import { cn } from '@/lib/utils';
 import IconDashboard from '@/components/icons/IconDashboard';
 import IconVirtualAssistant from '@/components/icons/IconVirtualAssistant';
 import IconCreditCard from '@/components/icons/IconCreditCard';
-import IconProfileSetting from '@/components/icons/IconProfileSetting';
 import IconLogOut from '@/components/icons/IconLogOut';
 import LogoReplyly from '@/components/ui/logo';
 import IconReplyly from '@/components/icons/IcontReplyly';
 
-import DashboardContent from './DashboardContent';
-
-export function SidebarDashboard() {
+export function SidebarVirtualAssistant() {
     const [activeLink, setActiveLink] = useState<string>('Panel');
 
     const handleLinkClick = (label: string) => {
@@ -30,9 +27,8 @@ export function SidebarDashboard() {
             href: '#',
             icon: (
                 <IconDashboard
-                    className='flex-shrink-0'
-                    size='1.5em'
-                    color={activeLink === 'Panel' ? 'hsl(var(--replyly))' : '#ffffff'}
+                    className="flex-shrink-0"
+                    size="1.5em"
                 />
             ),
         },
@@ -41,9 +37,8 @@ export function SidebarDashboard() {
             href: '#',
             icon: (
                 <IconVirtualAssistant
-                    className='flex-shrink-0'
-                    size='1.5em'
-                    color={activeLink === 'Asistente Virtual' ? 'hsl(var(--replyly))' : '#ffffff'}
+                    className="flex-shrink-0"
+                    size="1.5em"
                 />
             ),
         },
@@ -52,15 +47,15 @@ export function SidebarDashboard() {
             href: '#',
             icon: (
                 <IconCreditCard
-                    className='flex-shrink-0'
-                    size='1.5em'
-                    color={activeLink === 'Suscripcion' ? 'hsl(var(--replyly))' : '#ffffff'}
+                    className="flex-shrink-0"
+                    size="1.5em"
                 />
-          ),
+            ),
         },
     ];
 
     const [open, setOpen] = useState(false);
+    // const [open, setOpen] = useState(true);
     return (
         <div
             className={cn(
@@ -69,52 +64,48 @@ export function SidebarDashboard() {
             )}
         >
             <Sidebar open={open} setOpen={setOpen}>
-                <Flex
-                    direction='column'
-                    justify='between'
-                    onMouseEnter={() => setOpen(true)}
-                    onMouseLeave={() => setOpen(false)}
-                >
-                    <SidebarBody className='justify-between'>
-                        <div className='flex flex-col flex-1 overflow-y-auto overflow-x-hidden'>
-                            {open ? <Logo /> : <LogoIcon />}
+                <SidebarBody className='justify-between'>
+                    <div className='flex flex-col flex-1 overflow-y-auto overflow-x-hidden'>
+                        {open ? <Logo /> : <LogoIcon />}
 
-                            <div className='pl-3 mt-[3.5rem] flex flex-col gap-8'>
-                                {links.map((link, idx) => (
-                                    <SidebarLink
-                                        key={idx}
-                                        link={link}
-                                        onClick={() => handleLinkClick(link.label)}
-                                        className={`gruop ${activeLink === link.label ? 'activeLink' : ''}`}
-                                    />
-                                ))}
-                            </div>
+                        <div className='pl-3 mt-[3.5rem] flex flex-col gap-8'>
+                            {links.map((link, idx) => (
+                                <SidebarLink
+                                    key={idx}
+                                    link={link}
+                                    onClick={() => handleLinkClick(link.label)}
+                                    className={`gruop ${activeLink === link.label ? 'activeLink' : ''}`}
+                                />
+                            ))}
                         </div>
-                    </SidebarBody>
+                    </div>
 
-                    <Flex direction='column' className='bg-[#1c1c1c] p-4 gap-8'>
+                    <div className='pl-3 mb-6'>
                         <SidebarLink
-                            className={`gruop pl-3 flex-shrink-0 ${activeLink === 'Ajustes' ? 'activeLink' : ''}`}
-                            onClick={() => handleLinkClick('Ajustes')}
                             link={{
                                 label: 'Ajustes',
                                 href: '#',
                                 icon: (
-                                    <IconProfileSetting className='flex-shrink-0' size='1.5em' />
+                                    <IconSettings className='text-neutral-700 dark:text-neutral-200 h-6 w-6 flex-shrink-0' />
                                 ),
                             }}
                         />
+                    </div>
 
+                    <div className='pl-3 mb-6'>
                         <SidebarLink
-                            className='logout/sidebar flex-shrink-0 pl-3 ml-[-.25rem]'
                             link={{
                                 label: 'Cerrar Sesion',
                                 href: '#',
                                 icon: (
-                                    <IconLogOut className='flex-shrink-0' size='1.5em' />
+                                    // <IconArrowLeft className='text-neutral-700 dark:text-neutral-200 h-6 w-6 flex-shrink-0' />
+                                    <IconLogOut className="flex-shrink-0" size='1.5em' />
                                 ),
                             }}
                         />
+                    </div>
+
+                    <div>
                         <SidebarLink
                             link={{
                                 label: 'Vladimir Morfin',
@@ -122,7 +113,7 @@ export function SidebarDashboard() {
                                 icon: (
                                     <Image
                                         src='/dashboard/yo.jpeg'
-                                        className='h-[2.2em] w-[2.2em] scale-150 flex-shrink-0 rounded-full ml-1'
+                                        className='h-[2.2em] w-[2.2em] flex-shrink-0 rounded-full'
                                         width={80}
                                         height={80}
                                         alt='Avatar'
@@ -130,11 +121,11 @@ export function SidebarDashboard() {
                                 ),
                             }}
                         />
-                    </Flex>
-                </Flex>
+                    </div>
+                </SidebarBody>
             </Sidebar>
 
-            <Dashboard />
+            <VirtualAssistant />
         </div>
     );
 }
@@ -156,22 +147,34 @@ export const LogoIcon = () => {
       href='#'
       className='font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20'
     >
-        <IconReplyly size='calc(3em + 1vw)' />
+        <IconReplyly />
     </Link>
   );
 };
 
-const Dashboard = (): React.JSX.Element => {
+const VirtualAssistant = (): React.JSX.Element => {
     return (
-        <Flex
-            className='w-full h-full dark:bg-neutral-900 shadow-none'
-            justify='center'
-            p='4'
-            style={{ borderRadius: '3rem 0 0 0' }}
-        >
-            <DashboardContent />
-        </Flex>
+        <div className='flex flex-1'>
+            <div className='p-2 md:p-6 rounded-tl-2xl bg-white dark:bg-neutral-900 flex flex-col gap-4 flex-1 w-full h-full'>
+                <div className='flex gap-6'>
+                    {[...new Array(4)].map((i) => (
+                        <div
+                            key={'first-array' + i}
+                            className='h-20 w-full rounded-lg  bg-gray-100 dark:bg-neutral-800 animate-pulse'
+                        ></div>
+                    ))}
+                </div>
+                <div className='flex gap-6 flex-1'>
+                    {[...new Array(2)].map((i) => (
+                        <div
+                            key={'second-array' + i}
+                            className='h-full w-full rounded-lg  bg-gray-100 dark:bg-neutral-800 animate-pulse'
+                        ></div>
+                    ))}
+                </div>
+            </div>
+        </div>
     );
 };
 
-export default SidebarDashboard;
+export default SidebarVirtualAssistant;
