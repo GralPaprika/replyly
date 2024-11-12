@@ -1,45 +1,42 @@
+import React, { useState } from 'react';
 import { Flex } from "@radix-ui/themes";
 import { Button } from "@nextui-org/react";
 import { Textarea } from "../ui/textarea";
+import { IconSend } from '@tabler/icons-react';
 
 interface FooterChatProps {
-    avatar: string;
-    status: string | undefined;
-    statusColorMap: { [key: string]: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | undefined };
-    name: string;
-    phone: string;
-    channel: string;
-    channelIconMap: { [key: string]: React.ReactNode };
+    sendMessage: () => void;
+    message: string;
+    setMessage: React.Dispatch<React.SetStateAction<string>>;
+    handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
 const FooterChat: React.FC<FooterChatProps> = ({
-    avatar,
-    status,
-    statusColorMap,
-    name,
-    phone,
-    channel,
-    channelIconMap,
+    sendMessage,
+    message,
+    setMessage,
+    handleKeyDown
 }) => {
     return (
-        // <Flex align='center' justify='between'>
-        //     <Flex gap='5' align='center'>
-        //         <Avatar
-        //             src={avatar}
-        //             isBordered
-        //             color={status ? statusColorMap[status] : 'default'}
-        //         />
-        //         <Flex direction='column' justify='center'>
-        //             <Text truncate weight='medium' style={{ maxWidth: '10rem' }}>{name}</Text>
-        //             <Text className='text-muted-foreground'>{phone}</Text>
-        //         </Flex>
-        //     </Flex>
-        //     <Flex direction='column' justify='center' align='center'>
-        //         {channel && channelIconMap[channel]}
-        //         <Text className='capitalize' weight='medium'>{channel}</Text>
-        //     </Flex>
-        // </Flex>
-        <></>
+        <Flex align='center' justify='between' gap='4'>
+            <Textarea
+                placeholder='Escribe un mensaje'
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={handleKeyDown}
+            />
+
+            <Button
+                isIconOnly
+                variant='bordered'
+                aria-label='Send message'
+                className={message ? 'border-replyly' : ''}
+                isDisabled={!message}
+                onClick={sendMessage}
+            >
+                <IconSend color={message ? '#00e785' : 'currentColor'} />
+            </Button>
+        </Flex>
     );
 };
 

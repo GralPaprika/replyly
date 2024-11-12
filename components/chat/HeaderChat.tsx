@@ -4,7 +4,7 @@ import { Text, Flex } from '@radix-ui/themes';
 interface HeaderChatProps {
     avatar: string;
     status: string | undefined;
-    statusColorMap: { [key: string]: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | undefined };
+    statusColorMap: { [key: string]: 'success' | 'warning' | 'danger' | 'default' | undefined };
     name: string;
     phone: string;
     channel: string;

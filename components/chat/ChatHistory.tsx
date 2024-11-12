@@ -2,16 +2,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useOutsideClick } from '@/hooks/use-outside-click';
-import { IconSend } from '@tabler/icons-react';
 
-import { Chip, Button } from '@nextui-org/react';
+import { Chip } from '@nextui-org/react';
 import { Flex, Text } from '@radix-ui/themes';
 import { Avatar } from '@nextui-org/react';
-import { Textarea } from '../ui/textarea';
 
 import { IconChannelWhatsApp, IconChannelFacebook, IconChannelInstagram, IconChannelShopify, IconChannelWoo } from '../icons/channels';
 import HeaderChat from './HeaderChat';
 import MessageChat from './MessageChat';
+import FooterChat from './FooterChat';
+import ExpanderCard from './ExpanderCard';
 
 interface ChatHistoryProps {
     id?: string | number;
@@ -56,10 +56,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
     };
 
     const cards = [
-        {
-            name: name,
-            avatar: avatar,
-        }
+        { name: name, avatar: avatar }
     ];
 
     const sendMessage = () => {
@@ -156,29 +153,17 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
                                         avatar={avatar || ''}
                                         statusColor={status ? statusColorMap[status] : 'default'}
                                         isLastMessage={index === currentConversation.length - 1}
+                                        ref={index === currentConversation.length - 1 ? lastMessageRef : null}
                                     />
                                 ))}
                             </motion.div>
                             <motion.div className='p-6 bg-neutral-950'>
-                                <Flex align='center' justify='between' gap='4'>
-                                    <Textarea
-                                        placeholder='Escribe un mensaje'
-                                        value={message}
-                                        onChange={(e) => setMessage(e.target.value)}
-                                        onKeyDown={handleKeyDown}
-                                    />
-
-                                    <Button
-                                        isIconOnly
-                                        variant='bordered'
-                                        aria-label='Send message'
-                                        className={message ? 'border-replyly' : ''}
-                                        isDisabled={!message}
-                                        onClick={sendMessage}
-                                    >
-                                        <IconSend color={message ? '#00e785' : 'currentColor'} />
-                                    </Button>
-                                </Flex>
+                                <FooterChat
+                                    sendMessage={sendMessage}
+                                    message={message}
+                                    setMessage={setMessage}
+                                    handleKeyDown={handleKeyDown}
+                                />
                             </motion.div>
                         </motion.div>
                     </div>
@@ -193,35 +178,17 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
                         onClick={() => setActive({ ...card, name: card.name ?? '' })}
                         className='w-full flex justify-between bg-card hover:bg-neutral-900 items-center rounded-xl cursor-pointer p-6 overflow-auto'
                     >
-                        <Flex width='100%' justify='between' align='center' gap='6'>
-                            <Flex minWidth='15rem' gap='4' align='center' direction='row'>
-                                <Avatar
-                                    src={avatar}
-                                    isBordered
-                                    color={status ? statusColorMap[status] : 'default'}
-                                />
-                                <Text truncate weight='medium' style={{ maxWidth: '10rem' }}>{name}</Text>
-                            </Flex>
-
-                            <Flex minWidth='8rem' gap='4' justify='center' align='center'>
-                                <Text className='text-muted-foreground'>{phone}</Text>
-                            </Flex>
-
-                            <Flex minWidth='15rem' maxWidth='15rem' align='center'>
-                                <Text truncate weight='medium'>{lastMessage ? `${lastMessage.message}` : 'No hay mensajes'}</Text>
-                            </Flex>
-
-                            <Flex minWidth='8rem' gap='2' align='center'>
-                                {channel && channelIconMap[channel]}
-                                <Text className='text-muted-foreground capitalize'>{channel}</Text>
-                            </Flex>
-
-                            <Flex minWidth='8rem' gap='2' align='center' justify='end'>
-                                <Chip color={status ? statusColorMap[status] : 'default'} size='sm' variant='flat'>
-                                    <Text>{statusOptions.find(option => option.uid === status)?.name}</Text>
-                                </Chip>
-                            </Flex>
-                        </Flex>
+                        <ExpanderCard
+                            avatar={avatar || ''}
+                            name={name || ''}
+                            phone={phone || ''}
+                            lastMessage={lastMessage ? lastMessage.message : null}
+                            channel={channel || ''}
+                            status={status || ''}
+                            statusColorMap={statusColorMap}
+                            statusOptions={statusOptions}
+                            channelIconMap={channelIconMap}
+                        />
                     </motion.div>
                 ))}
             </div>

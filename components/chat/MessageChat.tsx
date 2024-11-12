@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { forwardRef } from 'react';
 import { Flex, Text } from '@radix-ui/themes';
 import { Avatar } from '@nextui-org/react';
 import AvatarReplyly from '../ui/avatarReplyly';
@@ -14,30 +14,21 @@ interface MessageChatProps {
     isLastMessage: boolean;
 }
 
-const MessageChat: React.FC<MessageChatProps> = ({ msg, avatar, statusColor, isLastMessage }) => {
-    const lastMessageRef = useRef<HTMLDivElement>(null);
-
-    return (
+const MessageChat = forwardRef<HTMLDivElement, MessageChatProps>(
+    ({ msg, avatar, statusColor, isLastMessage }, ref) => (
         <Flex
             gap='3'
             style={{
                 flexDirection: msg.sender === 'userConversation' ? 'row' : 'row-reverse'
             }}
-            ref={isLastMessage ? lastMessageRef : null}
+            ref={isLastMessage ? ref : null}
         >
             {msg.sender === 'userConversation' ? (
-                <Avatar
-                    src={avatar}
-                    isBordered
-                    color={statusColor}
-                />
+                <Avatar src={avatar} isBordered color={statusColor} />
             ) : msg.sender === 'agent' ? (
                 <AvatarReplyly />
             ) : (
-                <Avatar
-                    src='/dashboard/yo.jpeg'
-                    className='rounded-full border-1 border-replyly'
-                />
+                <Avatar src='/dashboard/yo.jpeg' className='rounded-full border-1 border-replyly' />
             )}
             <Flex
                 direction='column'
@@ -52,7 +43,7 @@ const MessageChat: React.FC<MessageChatProps> = ({ msg, avatar, statusColor, isL
                 <Text size='1'>{new Date(msg.timestamp).toLocaleString('es-MX', { hour12: true }).replace(',', '')}</Text>
             </Flex>
         </Flex>
-    );
-};
+    )
+);
 
 export default MessageChat;
