@@ -1,4 +1,4 @@
-const IconProfileSetting = ({ size = '3em', color = '#ffffff', classHoverColor = 'group-hover/sidebar:fill-[#00e785]', ...props }: React.SVGProps<SVGSVGElement> & { size?: string, color?: string, classHoverColor?: string }) => {
+const IconProfileSetting = ({ size = '1.5em', color = '#ffffff', classHoverColor = 'group-hover/sidebar:fill-[#00e785]', ...props }: React.SVGProps<SVGSVGElement> & { size?: string, color?: string, classHoverColor?: string }) => {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"

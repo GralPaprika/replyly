@@ -1,11 +1,7 @@
-"use client";
-
-import {
-  EmbeddedCheckout,
-  EmbeddedCheckoutProvider,
-} from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import { useCallback, useEffect, useRef, useState } from "react";
+'use client';
+import { EmbeddedCheckout, EmbeddedCheckoutProvider } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -33,7 +29,7 @@ export default function ProductList() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("/api/stripe/products");
+        const response = await fetch('/api/stripe/products');
         const data = await response.json();
 
         const transformedProducts = data.map((product: any) => {
@@ -67,7 +63,7 @@ export default function ProductList() {
 
         setProducts(transformedProducts);
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error('Error fetching products:', error);
       } finally {
         setLoading(false);
       }
@@ -77,9 +73,9 @@ export default function ProductList() {
   }, []);
 
   const fetchClientSecret = useCallback(() => {
-    return fetch("/api/stripe/embedded-checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    return fetch('/api/stripe/embedded-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(selectedPrices),
     })
       .then((res) => res.json())
@@ -105,29 +101,29 @@ export default function ProductList() {
   if (loading) return <p>Loading products...</p>;
 
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-4xl font-bold text-center mb-8">Our Products</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className='container mx-auto p-8'>
+      <h1 className='text-4xl font-bold text-center mb-8'>Our Products</h1>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
         {products.map((product) => (
-          <div key={product.id} className="card shadow-xl p-4">
-            <h2 className="text-2xl font-semibold">{product.name}</h2>
-            <p className="text-gray-500">{product.description}</p>
-            <div className="mt-4 space-y-2">
+          <div key={product.id} className='card shadow-xl p-4'>
+            <h2 className='text-2xl font-semibold'>{product.name}</h2>
+            <p className='text-gray-500'>{product.description}</p>
+            <div className='mt-4 space-y-2'>
               {product.priceFixed && (
-                <p className="text-lg">
-                  Fixed Price: {product.priceFixed.currency.toUpperCase()}{" "}
+                <p className='text-lg'>
+                  Fixed Price: {product.priceFixed.currency.toUpperCase()}{' '}
                   {(product.priceFixed.unit_amount / 100).toFixed(2)}
                 </p>
               )}
               {product.priceMetered && (
-                <p className="text-lg">
-                  Metered Price: {product.priceMetered.currency.toUpperCase()}{" "}
+                <p className='text-lg'>
+                  Metered Price: {product.priceMetered.currency.toUpperCase()}{' '}
                   {(product.priceMetered.unit_amount / 100).toFixed(2)}
                 </p>
               )}
             </div>
             <button
-              className="btn btn-primary mt-4"
+              className='btn btn-primary mt-4'
               onClick={() =>
                 openModal(
                   product.priceFixed?.id || null,
@@ -141,10 +137,10 @@ export default function ProductList() {
         ))}
       </div>
 
-      <dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Embedded Checkout</h3>
-          <div className="py-4">
+      <dialog ref={modalRef} className='modal modal-bottom sm:modal-middle'>
+        <div className='modal-box'>
+          <h3 className='font-bold text-lg'>Embedded Checkout</h3>
+          <div className='py-4'>
             {showCheckout && (
               <EmbeddedCheckoutProvider
                 stripe={stripePromise}
@@ -154,8 +150,8 @@ export default function ProductList() {
               </EmbeddedCheckoutProvider>
             )}
           </div>
-          <div className="modal-action">
-            <button className="btn btn-error" onClick={closeModal}>
+          <div className='modal-action'>
+            <button className='btn btn-error' onClick={closeModal}>
               Close
             </button>
           </div>

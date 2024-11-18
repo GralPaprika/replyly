@@ -1,7 +1,7 @@
 'use client'
 import * as React from 'react'
 import { Box, Flex } from '@radix-ui/themes';
-import { Button } from "@nextui-org/react";
+import { Button } from '@nextui-org/react';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { ChartConfig, ChartContainer } from '@/components/ui/chart'

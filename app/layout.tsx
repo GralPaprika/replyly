@@ -22,7 +22,6 @@ export default function RootLayout({
     <html lang='en'>
       <body
         className={plusJakartaSans.className}
-        // style={{ overflow: 'hidden' }}
       >
         <Providers>
           {children}

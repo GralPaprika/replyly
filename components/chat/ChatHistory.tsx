@@ -3,10 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useOutsideClick } from '@/hooks/use-outside-click';
 
-import { Chip } from '@nextui-org/react';
-import { Flex, Text } from '@radix-ui/themes';
-import { Avatar } from '@nextui-org/react';
-
 import { IconChannelWhatsApp, IconChannelFacebook, IconChannelInstagram, IconChannelShopify, IconChannelWoo } from '../icons/channels';
 import HeaderChat from './HeaderChat';
 import MessageChat from './MessageChat';

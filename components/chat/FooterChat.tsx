@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Flex } from "@radix-ui/themes";
-import { Button } from "@nextui-org/react";
-import { Textarea } from "../ui/textarea";
+import { Flex } from '@radix-ui/themes';
+import { Button } from '@nextui-org/react';
+import { Textarea } from '../ui/textarea';
 import { IconSend } from '@tabler/icons-react';
 
 interface FooterChatProps {

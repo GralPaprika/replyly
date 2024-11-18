@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useMemo, useCallback } from 'react';
-import { Input, Button, DropdownTrigger, Dropdown, DropdownMenu, DropdownItem, Chip, Pagination } from '@nextui-org/react';
+import { Input, Button, DropdownTrigger, Dropdown, DropdownMenu, DropdownItem, Pagination } from '@nextui-org/react';
 import { ChevronDown, Search } from 'lucide-react';
 import { Flex, Box, Text } from '@radix-ui/themes';
 
