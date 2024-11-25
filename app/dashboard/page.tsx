@@ -3,7 +3,7 @@ import DashboardContent from './DashboardContent';
 
 export default function Dashboard() {
     return (
-        <MainLayout>
+        <MainLayout moreClass='p-4'>
             <DashboardContent />
         </MainLayout>
     );

@@ -3,6 +3,7 @@ import * as React from 'react'
 
 import { NextUIProvider } from '@nextui-org/react';
 import {ThemeProvider as NextThemesProvider} from 'next-themes';
+import { TooltipProvider } from './ui/tooltip';
 
 import { GlobalProvider } from '@/app/context/GlobalContext'
 
@@ -18,9 +19,9 @@ export function Providers({ children, ...props }: ProvidersProps) {
         <NextThemesProvider attribute='class'
           defaultTheme='dark'
         >
-          {/* <GlobalProvider> */}
+          <TooltipProvider>
             {children}
-          {/* </GlobalProvider> */}
+          </TooltipProvider>
         </NextThemesProvider>
       </NextUIProvider>
     </Theme>

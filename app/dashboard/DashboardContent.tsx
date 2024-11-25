@@ -80,7 +80,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ content }) => {
                     <Flex className='bg-neutral-700/50 rounded-lg' align='center' p='2'>
                         <IconDashboard size='1.5em' />
                     </Flex>
-                    <Text style={{ color: 'hsl(var(--replyly))' }} size='4' weight='bold'>Panel</Text>
+                    <Text className='text-replyly' size='4' weight='bold'>Panel</Text>
                 </Flex>
             </Flex>
 

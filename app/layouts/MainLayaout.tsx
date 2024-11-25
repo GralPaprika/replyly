@@ -11,7 +11,12 @@ import { pincipalLinks, secondaryLinks } from './linksData';
 
 import IconReplyly from '@/components/icons/IcontReplyly';
 
-export default function MainLayout({ children }: { children: React.ReactNode }) {
+interface MainLayoutProps {
+    children: React.ReactNode;
+    moreClass?: string;
+}
+
+export default function MainLayout({ children, moreClass }: MainLayoutProps) {
     const pathname = usePathname();
 
     return (
@@ -82,7 +87,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 </Flex>
             </Sidebar>
 
-            <Flex className='w-full h-full bg-neutral-900 shadow-none rounded-tl-[3rem]' justify='center' p='4'>
+            <Flex
+                className={cn(
+                    'w-full h-full bg-neutral-900 shadow-none rounded-tl-[3rem]',
+                    moreClass
+                )}
+                justify='center'
+            >
                 {children}
             </Flex>
         </div>
