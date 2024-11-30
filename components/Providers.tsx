@@ -8,6 +8,7 @@ import { TooltipProvider } from './ui/tooltip';
 import { GlobalProvider } from '@/app/context/GlobalContext'
 
 import { Theme } from '@radix-ui/themes';
+
 interface ProvidersProps {
   children: React.ReactNode;
 }

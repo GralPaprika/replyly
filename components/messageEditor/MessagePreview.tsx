@@ -69,7 +69,7 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
 
     return (
         <div
-            className={`fixed -translate-x-[120%] w-80 transition-all duration-300 ease-in-out ${
+            className={`fixed -translate-x-[120%] w-96 transition-all duration-300 ease-in-out ${
                 visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
             }`}
             style={{ top: 'var(--preview-top, 2.7rem)' }}

@@ -5,6 +5,7 @@ import '@radix-ui/themes/styles.css';
 import './styles/globals.css';
 
 import { Providers } from '@/components/Providers';
+import { Toaster } from '@/components/ui/toaster';
 
 const plusJakartaSans = PlusJakartaSansFont({ subsets: ['latin'] });
 
@@ -25,6 +26,7 @@ export default function RootLayout({
       >
         <Providers>
           {children}
+          <Toaster />
         </Providers>
       </body>
     </html>

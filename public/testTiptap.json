@@ -2,31 +2,6 @@
   "type": "doc",
   "content": [
     {
-      "type": "heading",
-      "attrs": {
-        "level": 3
-      },
-      "content": [
-        {
-          "type": "text",
-          "text": "Si eligen "
-        },
-        {
-          "type": "text",
-          "marks": [
-            {
-              "type": "bold"
-            }
-          ],
-          "text": "Desayuno"
-        },
-        {
-          "type": "text",
-          "text": ":"
-        }
-      ]
-    },
-    {
       "type": "paragraph",
       "content": [
         {
@@ -36,18 +11,32 @@
               "type": "bold"
             }
           ],
-          "text": "¡Excelente elección!"
+          "text": "¡Hola y bienvenido a "
         },
         {
           "type": "text",
-          "text": " 🥞"
-        },
-        {
-          "type": "hardBreak"
+          "marks": [
+            {
+              "type": "bold"
+            },
+            {
+              "type": "italic"
+            }
+          ],
+          "text": "Delicias del Mar"
         },
         {
           "type": "text",
-          "text": "¿Qué te gustaría para comenzar el día?"
+          "marks": [
+            {
+              "type": "bold"
+            }
+          ],
+          "text": "!"
+        },
+        {
+          "type": "text",
+          "text": " 🌊🦐"
         }
       ]
     },
@@ -56,89 +45,7 @@
       "content": [
         {
           "type": "text",
-          "text": "1️⃣ "
-        },
-        {
-          "type": "text",
-          "marks": [
-            {
-              "type": "bold"
-            }
-          ],
-          "text": "Tostadas con aguacate y huevo pochado"
-        },
-        {
-          "type": "hardBreak"
-        },
-        {
-          "type": "text",
-          "text": "2️⃣ "
-        },
-        {
-          "type": "text",
-          "marks": [
-            {
-              "type": "bold"
-            }
-          ],
-          "text": "Croissants recién horneados"
-        },
-        {
-          "type": "hardBreak"
-        },
-        {
-          "type": "text",
-          "text": "3️⃣ "
-        },
-        {
-          "type": "text",
-          "marks": [
-            {
-              "type": "bold"
-            }
-          ],
-          "text": "Tazón de frutas con yogur y granola"
-        },
-        {
-          "type": "hardBreak"
-        },
-        {
-          "type": "text",
-          "text": "4️⃣ "
-        },
-        {
-          "type": "text",
-          "marks": [
-            {
-              "type": "bold"
-            }
-          ],
-          "text": "Sandwich de jamón y queso"
-        },
-        {
-          "type": "hardBreak"
-        },
-        {
-          "type": "text",
-          "text": "5️⃣ "
-        },
-        {
-          "type": "text",
-          "marks": [
-            {
-              "type": "bold"
-            }
-          ],
-          "text": "Café, té o jugo natural"
-        }
-      ]
-    },
-    {
-      "type": "paragraph",
-      "content": [
-        {
-          "type": "text",
-          "text": "¿Te gustaría acompañarlo con algo más? Responde con el número de la opción que prefieras."
+          "text": "Estamos encantados de que hayas decidido visitarnos. 🌟 Nuestro menú está lleno de frescura y sabor, con opciones que destacan lo mejor del mar. Ya sea que prefieras algo ligero, un plato principal delicioso o un postre para cerrar con broche de oro, aquí encontrarás lo que buscas."
         }
       ]
     }

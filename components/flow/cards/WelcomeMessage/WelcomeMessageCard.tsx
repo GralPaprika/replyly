@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Handle, Position } from 'reactflow';
+import { Handle, Position, useReactFlow } from 'reactflow';
 import { Flex, Box, Text } from '@radix-ui/themes';
 import { Divider } from '@nextui-org/react';
 
@@ -13,12 +13,15 @@ import { BotMessageSquare} from 'lucide-react';
 import { IconNote } from '../../../icons/flow';
 
 import MessageReader from '@/components/messageEditor/messageReader';
+import { useToast } from "@/hooks/use-toast"
 
 const WelcomeMessageCard = () => {
     const [showModal, setShowModal] = useState(false);
 
     const [message, setMessage] = useState<any>({});
     const [saving, setSaving] = useState(false);
+
+    const { toast } = useToast()
 
     const handleEditorChange = (content: any) => {
         setMessage(content);
@@ -53,11 +56,14 @@ const WelcomeMessageCard = () => {
                 throw new Error('Error al guardar el mensaje');
             }
 
-            alert('Mensaje guardado exitosamente');
         } catch (error) {
             console.error('Error al guardar el mensaje:', error);
         } finally {
             setSaving(false);
+            setShowModal(false);
+            toast({
+                title: 'Mensaje guardado exitosamente',
+            })
         }
     };
 
@@ -195,13 +201,13 @@ const WelcomeMessageCard = () => {
                     </DialogHeader>
 
                     <MessageEditor
-                        initialValue={message || "Cargando..."}
+                        initialValue={message || 'Cargando...'}
                         onChange={handleEditorChange}
-                        placeholder="Escribe aquí tu mensaje..."
-                        className="w-full"
-                        editorContentClassName="h-[32rem] max-h-[32rem] p-4 overflow-auto noneBar"
-                        editorClassName="focus:outline-none"
-                        output="json"
+                        placeholder='Escribe aquí tu mensaje...'
+                        className='w-full'
+                        editorContentClassName='h-[32rem] max-h-[32rem] p-4 overflow-auto noneBar'
+                        editorClassName='focus:outline-none'
+                        output='json'
                         // showJson
                         // showMarkdown
                         showPreviewMessage
