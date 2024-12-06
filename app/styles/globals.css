@@ -85,3 +85,11 @@
 .noneBar::-webkit-scrollbar {
   display: none;
 }
+
+.linkInReplyly {
+  color: #53bdeb;
+}
+
+.linkInReplyly:hover {
+  text-decoration: underline;
+}

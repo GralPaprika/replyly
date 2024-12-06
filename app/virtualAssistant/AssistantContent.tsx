@@ -1,46 +1,46 @@
 'use client';
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Box, Flex, Text } from '@radix-ui/themes';
+import { useRef } from 'react';
+import { Box, Flex } from '@radix-ui/themes';
+import { ReactFlowProvider } from 'reactflow';
 
-import Flow from "@/components/flow/Flow";
-import IconVirtualAssistant from "@/components/icons/IconVirtualAssistant";
-import { PanelLeft } from 'lucide-react';
+import Flow from '@/components/flow/Flow';
+import { RadialSpeedDial } from '@/components/ui/radialSpeedDial';
+import { BotMessageSquare } from 'lucide-react';
+import { IconAction, IconFlow } from '@/components/icons/flow';
+
+import FlowDataViewer from '@/components/flow/FlowDataViewer';
 
 export default function AssistantContent() {
-    const [openMenu, setOpenMenu] = useState(false);
+    const flowRef = useRef<any>(null);
 
-    const toggleMenu = () => {
-        setOpenMenu((prev) => !prev);
-    };
+    const speedDialActions = [
+        {
+            icon: IconFlow,
+            label: 'Tarjeta de Flow',
+            onClick: () => flowRef.current?.addNode('newFlowCard'),
+        },
+        {
+            icon: IconAction,
+            label: 'Tarjeta de Acción',
+            onClick: () => flowRef.current?.addNode('actionCard'),
+        },
+        {
+            icon: BotMessageSquare,
+            label: 'Tarjeta de Mensajes',
+            onClick: () => flowRef.current?.addNode('contextManagementCard'),
+        },
+    ];
 
     return (
-        <Flex width='100%' className='relative'>
-            <motion.div
-                initial={{ width: '0' }}
-                animate={{ width: openMenu ? '25rem' : '0' }}
-                transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-                className='h-full bg-neutral-900 overflow-hidden rounded-tl-[3rem] relative'
-            >
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: openMenu ? 1 : 0 }}
-                    transition={{ duration: 0.3, delay: openMenu ? 0.5 : 0 }}
-                    className='h-full'
-                >
-                    <Flex align='center' justify='center' gap='2' pt='4'>
-                        <Flex className='bg-neutral-700/50 rounded-lg' p='2'>
-                            <IconVirtualAssistant size='1.5em' />
-                        </Flex>
-                        <Text className='text-replyly' size='4' weight='bold'>Asistente Virtual</Text>
-                    </Flex>
-                </motion.div>
-            </motion.div>
+        <Flex width="100%" className="relative">
+            <Box className="w-full">
+                <ReactFlowProvider>
+                    <Flow ref={flowRef} />
 
-            <Box className='w-full'>
-                <PanelLeft className='fixed top-4 z-10 cursor-pointer ml-2' size='3rem' onClick={toggleMenu} />
-                <Flow />
+                    <FlowDataViewer />
+                    <RadialSpeedDial actions={speedDialActions} />
+                </ReactFlowProvider>
             </Box>
         </Flex>
     );
-};
+}

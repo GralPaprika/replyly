@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { EditorContent, useEditor, JSONContent } from '@tiptap/react';
+import Link from '@tiptap/extension-link';
 import StarterKit from '@tiptap/starter-kit';
 
 /**
@@ -14,6 +15,7 @@ interface MessageReaderProps {
     fetchContent?: () => Promise<JSONContent>;
     initialValue?: JSONContent;
     value?: JSONContent;
+    className?: string;
 }
 
 /**
@@ -31,13 +33,22 @@ interface MessageReaderProps {
  * <MessageReader initialValue={myJsonContent} />
  * <MessageReader value={myUpdatedJsonContent} />
  */
-const MessageReader: React.FC<MessageReaderProps> = ({ fetchContent, initialValue, value }) => {
+const MessageReader: React.FC<MessageReaderProps> = ({ fetchContent, initialValue, value, className }) => {
     const [jsonContent, setJsonContent] = useState<JSONContent | null>(initialValue || value || null);
 
     const editor = useEditor({
-        extensions: [StarterKit],
+        extensions: [
+            StarterKit,
+            Link.configure({
+                openOnClick: false,
+                HTMLAttributes: {
+                    class: 'linkInReplyly',
+                },
+            }),
+        ],
         content: jsonContent || '',
         editable: false,
+        immediatelyRender: false,
     });
 
     useEffect(() => {
@@ -75,7 +86,7 @@ const MessageReader: React.FC<MessageReaderProps> = ({ fetchContent, initialValu
 
     return (
         <>
-            {editor && <EditorContent editor={editor} />}
+            {editor && <EditorContent className={className} editor={editor} />}
         </>
     );
 };

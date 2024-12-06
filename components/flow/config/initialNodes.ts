@@ -1,17 +1,11 @@
 export const initialNodes = [
     {
         id: 'CustomerService',
-        type: 'custom',
+        type: 'customerService',
         draggable: true,
         position: { x: 0, y: 0 },
         data: {
-            items: [
-                'Respuestas desde el comando',
-                'Cliente necesita un agente',
-                'Reembolso/Devolución',
-                'Preguntas sobre su orden',
-                'Listos para comprar',
-            ],
+            items: [],
         },
     },
     {
@@ -26,6 +20,14 @@ export const initialNodes = [
         id: 'welcomeMessage',
         type: 'welcomeMessage',
         position: { x: -580, y: -115 },
+        data: {
+            items: [],
+        },
+    },
+    {
+        id: 'contactInfo',
+        type: 'contactInfo',
+        position: { x: -1240, y: -380 },
         data: {
             items: [],
         },

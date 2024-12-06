@@ -1,19 +1,28 @@
 export const initialEdges = [
     {
-        id: 'e3-1',
+        id: 'linkWhatsapp-1',
         source: 'linkWhatsapp',
         target: 'welcomeMessage',
         style: {
-            strokeWidth: 2,
+            strokeWidth: 8,
             stroke: '#00e785',
         },
     },
     {
-        id: 'e3-2',
+        id: 'welcomeMessage-1',
         source: 'welcomeMessage',
         target: 'CustomerService',
         style: {
-            strokeWidth: 2,
+            strokeWidth: 8,
+            stroke: '#00e785',
+        },
+    },
+    {
+        id: 'contactInfo-1',
+        source: 'contactInfo',
+        target: 'welcomeMessage',
+        style: {
+            strokeWidth: 8,
             stroke: '#00e785',
         },
     },

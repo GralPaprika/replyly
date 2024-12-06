@@ -7,7 +7,7 @@ import MessagePreview from './MessagePreview';
 
 interface MessageEditorProps {
   initialValue?: Content;
-  onChange?: (value: Content) => void;
+  onChange?: (value: string | Content) => void;
   placeholder?: string;
   className?: string;
   editorContentClassName?: string;

@@ -34,10 +34,27 @@ const MessagePreview: React.FC<MessagePreviewProps> = ({ message }) => {
      * @returns {boolean} True if the content is not empty and contains text, otherwise false.
      */
     const hasTextContent = (content: any): boolean => {
-        if (Array.isArray(content)) {
-            return content.some((item) => item.type === 'paragraph' && item.content && item.content.length > 0);
-        }
-        return false;
+        if (!content || !Array.isArray(content)) return false;
+
+        return content.some((item) => {
+            if (item.type === 'paragraph' && Array.isArray(item.content)) {
+                return item.content.some(
+                    (child: any) => child.type === 'text' && typeof child.text === 'string' && child.text.trim() !== ''
+                );
+            }
+
+            if (item.type === 'orderedList' || item.type === 'bulletList') {
+                return item.content && item.content.some((listItem: any) =>
+                    listItem.type === 'listItem' && listItem.content && listItem.content.some((child: any) =>
+                        child.type === 'paragraph' && Array.isArray(child.content) && child.content.some(
+                            (pContent: any) => pContent.type === 'text' && typeof pContent.text === 'string' && pContent.text.trim() !== ''
+                        )
+                    )
+                );
+            }
+
+            return false;
+        });
     };
 
     useEffect(() => {

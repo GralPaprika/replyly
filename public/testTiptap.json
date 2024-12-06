@@ -11,7 +11,7 @@
               "type": "bold"
             }
           ],
-          "text": "¡Hola y bienvenido a "
+          "text": "🌊 ¡Bienvenido a "
         },
         {
           "type": "text",
@@ -32,11 +32,7 @@
               "type": "bold"
             }
           ],
-          "text": "!"
-        },
-        {
-          "type": "text",
-          "text": " 🌊🦐"
+          "text": "! 🦐"
         }
       ]
     },
@@ -45,7 +41,14 @@
       "content": [
         {
           "type": "text",
-          "text": "Estamos encantados de que hayas decidido visitarnos. 🌟 Nuestro menú está lleno de frescura y sabor, con opciones que destacan lo mejor del mar. Ya sea que prefieras algo ligero, un plato principal delicioso o un postre para cerrar con broche de oro, aquí encontrarás lo que buscas."
+          "text": "Gracias por contactarnos. Ofrecemos lo mejor en mariscos frescos y un servicio excepcional. "
+        },
+        {
+          "type": "hardBreak"
+        },
+        {
+          "type": "text",
+          "text": "¿Cómo podemos ayudarte hoy? 😊"
         }
       ]
     }
