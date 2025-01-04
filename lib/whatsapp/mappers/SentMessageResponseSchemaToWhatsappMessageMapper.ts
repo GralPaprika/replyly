@@ -16,7 +16,7 @@ export class SentMessageResponseSchemaToWhatsappMessageMapper {
       whatsappConversationId: conversationId,
       content: message.text.body,
       sentAt: new Date(message.timestamp),
-      whapiMessageId: message.id,
+      whatsappMessageId: message.id,
       whapiChatId: message.chat_id,
       status: messageStatus,
       source: source

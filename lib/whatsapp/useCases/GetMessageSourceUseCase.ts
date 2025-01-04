@@ -21,13 +21,13 @@ export class GetMessageSourceUseCase {
 
   /**
    * Get the source of a message
-   * @param whapiMessageId
+   * @param whatsappMessageId
    * @returns {Promise<MessageSource>}
    * @throws {GetMessageSourceException}
    */
-  async execute(whapiMessageId: string): Promise<MessageSource> {
+  async execute(whatsappMessageId: string): Promise<MessageSource> {
     try {
-      const source = await this.whatsappRepository.getMessageSource(whapiMessageId)
+      const source = await this.whatsappRepository.getMessageSource(whatsappMessageId)
       switch (source) {
         case 1:
           return MessageSource.BusinessUser

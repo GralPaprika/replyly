@@ -11,7 +11,7 @@ export const whatsappMessages = pgTable('whatsapp_messages', {
   whatsappConversationId: uuid('whatsapp_conversation_id').notNull().references(() => whatsappConversation.id),
   content: text('content').notNull(),
   sentAt: timestamp('sent_at').defaultNow().notNull(),
-  whapiMessageId: text('whapi_message_id'),
+  whatsappMessageId: text('whapi_message_id'),
   whapiChatId: text('whapi_chat_id'),
   status: integer('status').notNull(),
   source: integer('source').notNull(),

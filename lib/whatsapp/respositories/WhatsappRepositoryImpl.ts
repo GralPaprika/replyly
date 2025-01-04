@@ -57,13 +57,13 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .execute()
   }
 
-  async getMessageSource(whapiMessageId: string): Promise<number> {
+  async getMessageSource(whatsappMessageId: string): Promise<number> {
     const result = await this.db
       .select({
         source: whatsappMessages.source,
       })
       .from(whatsappMessages)
-      .where(eq(whatsappMessages.whapiMessageId, whapiMessageId))
+      .where(eq(whatsappMessages.whatsappMessageId, whatsappMessageId))
       .execute()
 
     if (result.length === 0)
@@ -102,11 +102,11 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
     return result[0].status
   }
 
-  async updateMessageStatus(whapiMessageId: string, status: number): Promise<void> {
+  async updateMessageStatus(whatsappMessageId: string, status: number): Promise<void> {
     await this.db
       .update(whatsappMessages)
       .set({status})
-      .where(eq(whatsappMessages.whapiMessageId, whapiMessageId))
+      .where(eq(whatsappMessages.whatsappMessageId, whatsappMessageId))
       .execute()
   }
 

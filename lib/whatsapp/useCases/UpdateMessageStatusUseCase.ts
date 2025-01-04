@@ -11,13 +11,13 @@ export class UpdateMessageStatusUseCase {
 
   /**
    * Update the status of a message
-   * @param whapiMessageId
+   * @param whatsappMessageId
    * @param status
    * @throws {UpdateMessageException}
    */
-  async execute(whapiMessageId: string, status: MessageStatus): Promise<void> {
+  async execute(whatsappMessageId: string, status: MessageStatus): Promise<void> {
     try {
-      return this.whatsappRepository.updateMessageStatus(whapiMessageId, status)
+      return this.whatsappRepository.updateMessageStatus(whatsappMessageId, status)
     } catch (exception) {
       // @ts-ignore
       throw new UpdateMessageException(exception.message)

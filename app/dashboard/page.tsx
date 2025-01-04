@@ -131,27 +131,31 @@ export function SidebarDashboard() {
     );
 }
 
-export const Logo = () => {
+export class Logo extends React.Component {
+  render() {
     return (
-        <Link
-            href='#'
-            className='font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20'
-        >
-            <LogoReplyly />
-        </Link>
+      <Link
+        href="#"
+        className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
+      >
+        <LogoReplyly/>
+      </Link>
     );
-};
+  }
+}
 
-export const LogoIcon = () => {
-  return (
-    <Link
-      href='#'
-      className='font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20'
-    >
-        <IconReplyly />
-    </Link>
-  );
-};
+export class LogoIcon extends React.Component {
+  render() {
+    return (
+      <Link
+        href="#"
+        className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
+      >
+        <IconReplyly/>
+      </Link>
+    );
+  }
+}
 
 const Dashboard = (): React.JSX.Element => {
     return (

@@ -3,9 +3,8 @@ import {WhatsappRouteComposition} from "@/composition/WhatsappRouteComposition";
 import {MessageSentNotificationWebhookSchema} from "@/lib/whatsapp/models/webhook/MessageSentNotificationWebhookSchema";
 import {MessageStatus} from "@/lib/whatsapp/models/enum/MessageStatus";
 import {MessageSource} from "@/lib/common/models/MessageSource";
-import {MessageWebhookSchema} from "@/lib/whatsapp/models/webhook/MessageWebhookSchema";
+import {Data as WebHookData} from "@/lib/whatsapp/models/webhook/MessageWebhookSchema";
 import {SentMessageResponseSchema} from "@/lib/whatsapp/models/message/SentMessageResponseSchema";
-import {Document} from "@/lib/ai/models/Document";
 import {RouteResponse} from "@/lib/whatsapp/models/RouteResponse";
 import {HttpResponseCode} from "@/lib/common/models/HttpResponseCode";
 import {GetMessageSourceException} from "@/lib/whatsapp/useCases/GetMessageSourceUseCase";
@@ -24,7 +23,7 @@ export class WhatsappApiRouteController {
 
   async processMessage(
     whatsappId: string,
-    data: MessageWebhookSchema | MessageSentNotificationWebhookSchema
+    data: WebHookData | MessageSentNotificationWebhookSchema
   ): Promise<RouteResponse> {
     const conversationId = await this.getConversationId(whatsappId, this.getChatId(data))
 
@@ -47,7 +46,7 @@ export class WhatsappApiRouteController {
       return this.handleCreateResponse(
         whatsappId,
         conversationId,
-        data as MessageWebhookSchema,
+        data as WebHookData,
       )
     }
     else {
@@ -60,17 +59,17 @@ export class WhatsappApiRouteController {
 
   private async handleBotResponded(data: MessageSentNotificationWebhookSchema): Promise<RouteResponse> {
     try {
-      const whapiMessageId = data.statuses[0].id
+      const whatsappMessageId = data.statuses[0].id
       const status = this.getMessageStatusSentFromNotification(data)
 
       if (status === MessageStatus.Failed) {
         return {
-          body: {message: `${ResponseMessage.ErrorSendingMessage} ${whapiMessageId}`},
+          body: {message: `${ResponseMessage.ErrorSendingMessage} ${whatsappMessageId}`},
           init: {status: HttpResponseCode.ServerError},
         }
       }
 
-      await this.updateMessageStatus(whapiMessageId, status)
+      await this.updateMessageStatus(whatsappMessageId, status)
 
       return {
         body: {message: ResponseMessage.AlreadyDispatched},
@@ -88,7 +87,7 @@ export class WhatsappApiRouteController {
   private async handleCreateResponse(
     whatsappId: string,
     conversationId: string,
-    messageSchema: MessageWebhookSchema,
+    data: WebHookData,
   ): Promise<RouteResponse> {
     try {
       if (!await this.hasActivePlan(whatsappId)) {
@@ -98,7 +97,7 @@ export class WhatsappApiRouteController {
         }
       }
 
-      const sender = messageSchema.messages[0].from
+      const sender = data.messages.key.remoteJid
       if (await this.checkIfSenderIsBlackListed(whatsappId, sender)) {
         return {
           body: {message: ResponseMessage.Responded},
@@ -106,9 +105,9 @@ export class WhatsappApiRouteController {
         }
       }
 
-      const whapiMessageId = messageSchema.messages[0].id
-      const fromMe = messageSchema.messages[0].from_me
-      const source = await this.getMessageSource(whapiMessageId, fromMe)
+      const whatsappMessageId = data.messages.key.id
+      const fromMe = data.messages.key.fromMe
+      const source = await this.getMessageSource(whatsappMessageId, fromMe)
 
       if (source === MessageSource.Bot)
         return {
@@ -122,23 +121,13 @@ export class WhatsappApiRouteController {
           init: {status: HttpResponseCode.Ok},
         }
 
-      await this.saveReceivedMessage(conversationId, messageSchema)
-
       await this.updateConversationStatus(conversationId, ConversationStatus.MessageReceived)
 
-      let response: string
-      if (await this.isMessageReceivedWithWorkingHours(whatsappId)) {
-        // Process the input
-        response = await this.getBusinessBestResponseToPrompt(whatsappId, messageSchema.messages[0].text.body)
-      } else {
-        response = await this.getRAGResponse(whatsappId, messageSchema.messages[0].text.body)
-      }
+      const response = await this.getBestResponse()
 
-      const messageSent = await this.sendResponseMessage(whatsappId, messageSchema, response)
+      const messageSent = await this.sendResponseMessage(whatsappId, data, response)
 
       await this.updateConversationStatus(conversationId, ConversationStatus.BotResponded)
-
-      await this.saveSentMessage(conversationId, messageSent)
 
       await this.increaseMessageCountUsage(whatsappId)
 
@@ -174,8 +163,8 @@ export class WhatsappApiRouteController {
     }
   }
 
-  private getChatId(schema: MessageWebhookSchema | MessageSentNotificationWebhookSchema): string {
-    if ('messages' in schema) return schema.messages[0].chat_id
+  private getChatId(schema: WebHookData | MessageSentNotificationWebhookSchema): string {
+    if ('messages' in schema) return schema.messages.key.remoteJid
     return schema.statuses[0].recipient_id
   }
 
@@ -192,27 +181,18 @@ export class WhatsappApiRouteController {
     return this.composition.provideStringToMessageStatusMapper().map(status)
   }
 
-  private async updateMessageStatus(whapiMessageId: string, status: MessageStatus): Promise<void> {
-    await this.composition.provideUpdateMessageStatusUseCase().execute(whapiMessageId, status)
+  private async updateMessageStatus(whatsappMessageId: string, status: MessageStatus): Promise<void> {
+    await this.composition.provideUpdateMessageStatusUseCase().execute(whatsappMessageId, status)
   }
 
-  private async getMessageSource(whapiMessageId: string, fromMe: boolean): Promise<MessageSource> {
+  private async getMessageSource(whatsappMessageId: string, fromMe: boolean): Promise<MessageSource> {
     if (!fromMe) return MessageSource.Client
 
-    return await this.composition.provideGetMessageSourceUseCase().execute(whapiMessageId)
+    return await this.composition.provideGetMessageSourceUseCase().execute(whatsappMessageId)
   }
 
   private async hasActivePlan(whatsappId: string): Promise<boolean> {
     return this.composition.provideHasActivePlanUseCase().execute(whatsappId)
-  }
-
-  private async saveReceivedMessage(conversationId: string, messageSchema: MessageWebhookSchema): Promise<void> {
-    await this.composition.provideSaveReceivedMessageUseCase().execute(
-      conversationId,
-      MessageStatus.Read, // Because the bot is the one receiving the message its status is read.
-      MessageSource.Client,
-      messageSchema,
-    )
   }
 
   private async updateConversationStatus(conversationId: string, status: ConversationStatus): Promise<void> {
@@ -223,34 +203,13 @@ export class WhatsappApiRouteController {
     return await this.composition.provideTimeWithinLocationBusinessHoursUseCase().execute(whatsappId)
   }
 
-  private async getBusinessBestResponseToPrompt(whatsappId: string, prompt: string): Promise<string> {
-    const possibleResponses = await (
-      await this.composition.provideGetBestResponsesToClientRequestUseCase()
-    ).execute(whatsappId, prompt)
-
-    return possibleResponses[0][0].pageContent
-  }
-
-  private async getRAGResponse(whatsappId: string, prompt: string): Promise<string> {
-    return (await this.composition.provideGetRAGResponseUseCase()).execute(whatsappId, prompt);
-  }
-
   private async sendResponseMessage(
     whatsappId: string,
-    data: MessageWebhookSchema,
+    data: WebHookData,
     content: string,
   ): Promise<SentMessageResponseSchema> {
-    const recipientId = data.messages[0].from
+    const recipientId = data.messages.key.remoteJid
     return await this.composition.provideSendMessageToClientUseCase().execute(whatsappId, recipientId, content)
-  }
-
-  private async saveSentMessage(conversationId: string, responseSchema: SentMessageResponseSchema): Promise<void> {
-    await this.composition.provideSaveSentMessageUseCase().execute(
-      conversationId,
-      MessageStatus.Sent,
-      MessageSource.Bot,
-      responseSchema,
-    )
   }
 
   private async increaseMessageCountUsage(whatsappId: string): Promise<void> {
@@ -262,11 +221,7 @@ export class WhatsappApiRouteController {
     return await this.composition.provideIsNumberBlackListedUseCase().execute(whatsappId, sender)
   }
 
-  async saveResponses(businessLocationId: string, responses: string[]): Promise<void> {
-    await (await this.composition.provideSaveResponsesUseCase()).execute(businessLocationId, responses)
-  }
-
-  async getResponsesForPrompt(whatsappId: string, prompt: string): Promise<[Document, number][]> {
-    return await (await this.composition.provideGetBestResponsesToClientRequestUseCase()).execute(whatsappId, prompt)
+  private async getBestResponse(): Promise<string> {
+    return "Foo"
   }
 }

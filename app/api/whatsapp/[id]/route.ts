@@ -18,10 +18,8 @@ export async function GET(request: Request, {params}: { params: Promise<{ id: st
 
   const controller = new WhatsappApiRouteController(WhatsappRouteComposition.provideInstance())
 
-  const responses = await controller.getResponsesForPrompt(whatsappId, "Dirección")
-
   return NextResponse.json(
-    responses,
+    {message: "received"},
     {status: HttpResponseCode.AlreadyReported},
   )
 }
@@ -45,5 +43,5 @@ export async function POST(request: Request, {params}: { params: { id: string } 
 
   const {body, init} = await controller.processMessage(whatsappId, data)
 
-  NextResponse.json(body, init)
+  return NextResponse.json(body, init)
 }

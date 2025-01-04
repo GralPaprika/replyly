@@ -2,7 +2,7 @@ export interface WhatsappMessage {
   whatsappConversationId: string,
   content: string,
   sentAt: Date,
-  whapiMessageId: string,
+  whatsappMessageId: string,
   whapiChatId: string,
   status: number,
   source: number,
