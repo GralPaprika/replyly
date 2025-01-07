@@ -1,19 +1,15 @@
 import {ConversationStatus} from "@/lib/common/models/ConversationStatus";
 import {WhatsappRouteComposition} from "@/composition/WhatsappRouteComposition";
-import {MessageSentNotificationWebhookSchema} from "@/lib/whatsapp/models/webhook/MessageSentNotificationWebhookSchema";
-import {MessageStatus} from "@/lib/whatsapp/models/enum/MessageStatus";
 import {MessageSource} from "@/lib/common/models/MessageSource";
 import {Data as WebHookData} from "@/lib/whatsapp/models/webhook/MessageWebhookSchema";
-import {SentMessageResponseSchema} from "@/lib/whatsapp/models/message/SentMessageResponseSchema";
+import {SendMessageResponseSchema} from "@/lib/whatsapp/models/message/SendMessageResponseSchema";
 import {RouteResponse} from "@/lib/whatsapp/models/RouteResponse";
 import {HttpResponseCode} from "@/lib/common/models/HttpResponseCode";
-import {GetMessageSourceException} from "@/lib/whatsapp/useCases/GetMessageSourceUseCase";
 import {HasActivePlanException} from "@/lib/whatsapp/useCases/HasActivePlanUseCase";
 
 enum ResponseMessage {
   AlreadyDispatched = 'Already dispatched',
   UserInChat = 'User in chat',
-  ErrorSendingMessage = 'Error sending message',
   UnknownError = 'Unknown error',
   Responded = 'Responded',
 }
@@ -23,17 +19,17 @@ export class WhatsappApiRouteController {
 
   async processMessage(
     whatsappId: string,
-    data: WebHookData | MessageSentNotificationWebhookSchema
+    data: WebHookData
   ): Promise<RouteResponse> {
     const conversationId = await this.getConversationId(whatsappId, this.getChatId(data))
 
-    // Because of how Whapi works any time the owner of the whatsapp session sends a message (it could be through whapi
-    // or manually) another request is sent to the webhook with the status of said message. So we need to check if the bot
-    // has already responded to the message to parse the request accordingly and update the status of the message.
     const conversationStatus = await this.getConversationStatus(conversationId)
 
     if (conversationStatus === ConversationStatus.BotResponded) {
-      return this.handleBotResponded(data as MessageSentNotificationWebhookSchema)
+      return {
+        body: {message: ResponseMessage.Responded},
+        init: {status: HttpResponseCode.Ok},
+      }
     } else if (conversationStatus === ConversationStatus.UserTookControl) {
       return {
         body: {message: ResponseMessage.AlreadyDispatched},
@@ -53,33 +49,6 @@ export class WhatsappApiRouteController {
       return {
         body: {message: ResponseMessage.UnknownError},
         init: {status: HttpResponseCode.ServerError},
-      }
-    }
-  }
-
-  private async handleBotResponded(data: MessageSentNotificationWebhookSchema): Promise<RouteResponse> {
-    try {
-      const whatsappMessageId = data.statuses[0].id
-      const status = this.getMessageStatusSentFromNotification(data)
-
-      if (status === MessageStatus.Failed) {
-        return {
-          body: {message: `${ResponseMessage.ErrorSendingMessage} ${whatsappMessageId}`},
-          init: {status: HttpResponseCode.ServerError},
-        }
-      }
-
-      await this.updateMessageStatus(whatsappMessageId, status)
-
-      return {
-        body: {message: ResponseMessage.AlreadyDispatched},
-        init: {status: HttpResponseCode.Ok},
-      }
-    } catch (exception) {
-      return {
-        // @ts-ignore
-        body: {message: exception.message},
-        init: {status: HttpResponseCode.ServerError}
       }
     }
   }
@@ -105,9 +74,9 @@ export class WhatsappApiRouteController {
         }
       }
 
-      const whatsappMessageId = data.messages.key.id
       const fromMe = data.messages.key.fromMe
-      const source = await this.getMessageSource(whatsappMessageId, fromMe)
+      const fromSever = data.messages.sentFromServer
+      const source = await this.getMessageSource(fromMe, fromSever)
 
       if (source === MessageSource.Bot)
         return {
@@ -144,15 +113,6 @@ export class WhatsappApiRouteController {
           init: {status: httpCode},
         }
       }
-      else if (exception instanceof GetMessageSourceException) {
-        const httpCode =
-          exception.code === GetMessageSourceException.ErrorCode.MessageNotFound ?
-            HttpResponseCode.NotFound : HttpResponseCode.ServerError
-        return {
-          body: {message: exception.message},
-          init: {status: httpCode},
-        }
-      }
       else {
         return {
           // @ts-ignore
@@ -163,9 +123,8 @@ export class WhatsappApiRouteController {
     }
   }
 
-  private getChatId(schema: WebHookData | MessageSentNotificationWebhookSchema): string {
-    if ('messages' in schema) return schema.messages.key.remoteJid
-    return schema.statuses[0].recipient_id
+  private getChatId(schema: WebHookData): string {
+    return schema.messages.key.remoteJid
   }
 
   private async getConversationId(whatsappId: string, chatId: string): Promise<string> {
@@ -176,19 +135,9 @@ export class WhatsappApiRouteController {
     return this.composition.provideGetConversationStatusUseCase().execute(conversationId)
   }
 
-  private getMessageStatusSentFromNotification(notificationSchema: MessageSentNotificationWebhookSchema): MessageStatus {
-    const status = notificationSchema.statuses[0].status
-    return this.composition.provideStringToMessageStatusMapper().map(status)
-  }
-
-  private async updateMessageStatus(whatsappMessageId: string, status: MessageStatus): Promise<void> {
-    await this.composition.provideUpdateMessageStatusUseCase().execute(whatsappMessageId, status)
-  }
-
-  private async getMessageSource(whatsappMessageId: string, fromMe: boolean): Promise<MessageSource> {
+  private async getMessageSource(fromMe: boolean, fromServer: boolean): Promise<MessageSource> {
     if (!fromMe) return MessageSource.Client
-
-    return await this.composition.provideGetMessageSourceUseCase().execute(whatsappMessageId)
+    return fromServer ? MessageSource.Bot : MessageSource.BusinessUser
   }
 
   private async hasActivePlan(whatsappId: string): Promise<boolean> {
@@ -207,7 +156,7 @@ export class WhatsappApiRouteController {
     whatsappId: string,
     data: WebHookData,
     content: string,
-  ): Promise<SentMessageResponseSchema> {
+  ): Promise<SendMessageResponseSchema> {
     const recipientId = data.messages.key.remoteJid
     return await this.composition.provideSendMessageToClientUseCase().execute(whatsappId, recipientId, content)
   }

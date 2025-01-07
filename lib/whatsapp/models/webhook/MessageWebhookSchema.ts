@@ -1,6 +1,6 @@
 export interface DisappearingMode {
-  initiator: string;
-  trigger: string;
+  initiator?: string;
+  trigger?: string;
   initiatedByMe: boolean;
 }
 
@@ -84,6 +84,7 @@ export interface Messages {
   status?: number;
   message: MessageContent;
   verifiedBizName?: string;
+  sentFromServer: boolean;
 }
 
 export interface Data {

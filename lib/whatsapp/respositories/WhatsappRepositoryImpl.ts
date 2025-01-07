@@ -3,17 +3,14 @@ import {whatsapp} from "@/db/schema/whatsapp";
 import {and, eq} from "drizzle-orm";
 import {businessLocations} from "@/db/schema/businessLocations";
 import {businessPlan} from "@/db/schema/businessPlan";
-import {whatsappMessages} from "@/db/schema/whatsappMessages";
 import {isFalse, isTrue} from "@/lib/common/helpers/DatabaseFunctions";
 import {networksPerBusiness} from "@/db/schema/networksPerBusiness";
-import {WhatsappMessage} from "@/lib/whatsapp/models/message/WhatsappMessage";
 import {ConversationStatus} from "@/lib/common/models/ConversationStatus";
 import {RepositoryException, WhatsappRepository} from "@/lib/whatsapp/models/WhatsappRepository";
 import {whatsappConversation} from "@/db/schema/whatsappConversation";
 import {whatsappContacts} from "@/db/schema/whatsappContacts";
 
 enum ErrorMessage {
-  MessageNotFound = 'Message not found',
   ConversationStatusNotFound = 'Conversation status not found',
 }
 
@@ -57,33 +54,11 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .execute()
   }
 
-  async getMessageSource(whatsappMessageId: string): Promise<number> {
-    const result = await this.db
-      .select({
-        source: whatsappMessages.source,
-      })
-      .from(whatsappMessages)
-      .where(eq(whatsappMessages.whatsappMessageId, whatsappMessageId))
-      .execute()
-
-    if (result.length === 0)
-      throw new RepositoryException(ErrorMessage.MessageNotFound.valueOf())
-
-    return result[0].source
-  }
-
   async deactivateBusinessPlan(planId: string): Promise<void> {
     await this.db
       .update(businessPlan)
       .set({active: false})
       .where(eq(businessPlan.id, planId))
-      .execute()
-  }
-
-  async saveMessage(data: WhatsappMessage): Promise<void> {
-    await this.db
-      .insert(whatsappMessages)
-      .values(data)
       .execute()
   }
 
@@ -100,14 +75,6 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       throw new RepositoryException(ErrorMessage.ConversationStatusNotFound.valueOf())
 
     return result[0].status
-  }
-
-  async updateMessageStatus(whatsappMessageId: string, status: number): Promise<void> {
-    await this.db
-      .update(whatsappMessages)
-      .set({status})
-      .where(eq(whatsappMessages.whatsappMessageId, whatsappMessageId))
-      .execute()
   }
 
   async updateConversationStatus(conversationId: string, status: ConversationStatus): Promise<void> {
@@ -131,17 +98,6 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
         .where(and(eq(whatsapp.id, whatsappId), isFalse(whatsapp.deleted)))
         .execute()
     )[0].businessLocationId
-  }
-
-  async getWhatsappTokenByWhatsappId(whatsappId: string): Promise<string> {
-    return (await this.db
-        .select({
-          token: whatsapp.token,
-        })
-        .from(whatsapp)
-        .where(and(eq(whatsapp.id, whatsappId), isFalse(whatsapp.deleted)))
-        .execute()
-    )[0].token
   }
 
   async increaseMessageCountUsage(whatsappId: string, amount: number): Promise<void> {
