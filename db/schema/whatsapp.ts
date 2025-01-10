@@ -4,7 +4,7 @@ import {businessLocations} from "@/db/schema/businessLocations";
 /**
  * Whatsapp table
  *
- * This table store whatsapp (whapi) information necessary to send and receive messages.
+ * This table store whatsapp information necessary to send and receive messages.
  * It's linked to a business location, and has a token to authenticate with the whapi API.
  */
 export const whatsapp = pgTable('whatsapp', {

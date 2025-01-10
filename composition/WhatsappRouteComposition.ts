@@ -56,7 +56,7 @@ export class WhatsappRouteComposition {
   }
 
   provideSendMessageToClientUseCase(): SendMessageToClientUseCase {
-    return this.sendMessageToClientUseCase ??= new SendMessageToClientUseCase(this.provideWhatsappRepository())
+    return this.sendMessageToClientUseCase ??= new SendMessageToClientUseCase()
   }
 
   provideIncreaseMessageCountUsageUseCase(): IncreaseMessageCountUsageUseCase {

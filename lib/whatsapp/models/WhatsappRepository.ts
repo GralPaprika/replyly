@@ -57,7 +57,7 @@ export interface WhatsappRepository {
    */
   increaseMessageCountUsage(whatsappId: string, amount: number): Promise<void>
 
-  getConversationId(whatsappId: string, whapiChatId: string): Promise<string>
+  getConversationId(whatsappId: string, chatId: string): Promise<string>
 
   getBusinessHours(businessLocationId: string): Promise<object>
 

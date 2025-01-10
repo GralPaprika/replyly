@@ -125,7 +125,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .execute()
   }
 
-  async getConversationId(whatsappId: string, whapiChatId: string): Promise<string> {
+  async getConversationId(whatsappId: string, chatId: string): Promise<string> {
     return (await this.db
         .select({
           conversationId: whatsappConversation.id,
@@ -134,7 +134,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
         .where(
           and(
             eq(whatsappConversation.whatsappId, whatsappId),
-            eq(whatsappConversation.whapiChatId, whapiChatId),
+            eq(whatsappConversation.chatId, chatId),
             isFalse(whatsappConversation.deleted),
           ),
         )

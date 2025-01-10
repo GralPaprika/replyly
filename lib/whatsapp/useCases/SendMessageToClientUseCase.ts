@@ -1,4 +1,3 @@
-import {WhatsappRepository} from "@/lib/whatsapp/models/WhatsappRepository";
 import {HttpMethod} from "@/lib/common/models/HttpMethod";
 import {ContentType} from "@/lib/common/models/ContentType";
 import {HttpHeader} from "@/lib/common/models/HttpHeader";
@@ -13,8 +12,6 @@ export class SendMessageToClientException implements Exception {
 const URL = process.env.WHATSAPP_SERVICE ?? 'localhost:3030'
 
 export class SendMessageToClientUseCase {
-  constructor(private readonly whatsappRepository: WhatsappRepository) {}
-
   /**
    * Send a message to a specific recipient using whatsapp channel.
    * @param senderID The ID of the sender (a replyly user).
