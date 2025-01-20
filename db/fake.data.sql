@@ -152,24 +152,13 @@ VALUES
 
 -- Business location for Acme Corporation
 INSERT INTO
-    public.business_locations (id, name, business_id, is_global, created_at, deleted)
+    public.business_locations (id, name, business_id, is_global, schedule, created_at, deleted)
 VALUES
     (
         '26dbb056-75a2-48a5-a8b3-46f708221c5c',
         'ACME Corporation',
         'b7e82f32-af70-48ad-b355-c97629b4afdb', -- business_id
         TRUE,
-        NOW(),
-        FALSE
-    );
-
--- Insert a schedule for the location created for Acme Admin
-INSERT INTO
-    public.schedules (id, business_location_id, schedule, deleted)
-VALUES
-    (
-        '4ddde752-6860-4012-808f-f79b33df837b',
-        '26dbb056-75a2-48a5-a8b3-46f708221c5c', -- location id
         '{
           "monday": {
             "startTime": "09:00",
@@ -206,6 +195,7 @@ VALUES
             "endTime": "14:00"
           }
         }',
+        NOW(),
         FALSE
     );
 
@@ -226,7 +216,6 @@ INSERT INTO
         id,
         business_location_id,
         phone_number,
-        token,
         session_status,
         created_at,
         deleted
@@ -236,7 +225,6 @@ INSERT INTO
             '3a617457-5d6a-4a0d-9a15-0f466fd5a8b0',
             '26dbb056-75a2-48a5-a8b3-46f708221c5c', -- location id
             '1234567890', -- Replace with the actual phone number
-            'JNujdgD1VNDBQPqIG0XL32ZD4mpsg9AO', -- Replace with the actual token
             4, -- AUTH WhatsApp status ID
             NOW(),
             FALSE

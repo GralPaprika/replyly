@@ -26,7 +26,7 @@ export async function GET(request: Request, {params}: { params: Promise<{ id: st
 }
 
 /**
- * This method captures messages received and sent from a whatsapp number through the Whapi service.
+ * This method captures messages received and sent from a whatsapp number.
  *
  * It is required to be HTTP POST method.
  *
@@ -39,6 +39,8 @@ export async function POST(request: Request, {params}: { params: { id: string } 
   const webhookSchema: MessageWebhookSchema = await request.json()
 
   const controller = new WhatsappApiRouteController(WhatsappRouteComposition.provideInstance())
+
+  console.log('received', JSON.stringify(webhookSchema, null, 2))
 
   const {body, init} = await controller.processMessage(whatsappId, webhookSchema.data)
 

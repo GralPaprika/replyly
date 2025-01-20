@@ -12,6 +12,7 @@ enum ResponseMessage {
   UserInChat = 'User in chat',
   UnknownError = 'Unknown error',
   Responded = 'Responded',
+  GroupMessage = 'Group message ignored',
 }
 
 export class WhatsappApiRouteController {
@@ -21,44 +22,32 @@ export class WhatsappApiRouteController {
     whatsappId: string,
     data: WebHookData
   ): Promise<RouteResponse> {
-    const conversationId = await this.getConversationId(whatsappId, this.getChatId(data))
-
-    const conversationStatus = await this.getConversationStatus(conversationId)
-
-    if (conversationStatus === ConversationStatus.BotResponded) {
-      return {
-        body: {message: ResponseMessage.Responded},
-        init: {status: HttpResponseCode.Ok},
-      }
-    } else if (conversationStatus === ConversationStatus.UserTookControl) {
-      return {
-        body: {message: ResponseMessage.AlreadyDispatched},
-        init: {status: HttpResponseCode.Ok},
-      }
-    } else if (
-      conversationStatus == ConversationStatus.Idle ||
-      conversationStatus == ConversationStatus.MessageReceived
-    ){
-      return this.handleCreateResponse(
-        whatsappId,
-        conversationId,
-        data as WebHookData,
-      )
-    }
-    else {
-      return {
-        body: {message: ResponseMessage.UnknownError},
-        init: {status: HttpResponseCode.ServerError},
-      }
-    }
-  }
-
-  private async handleCreateResponse(
-    whatsappId: string,
-    conversationId: string,
-    data: WebHookData,
-  ): Promise<RouteResponse> {
     try {
+      const conversationId = await this.getConversationId(whatsappId, this.getChatId(data))
+
+      if (this.isFromGroup(data)) {
+        return {
+          body: {message: ResponseMessage.GroupMessage},
+          init: {status: HttpResponseCode.Ok},
+        }
+      }
+
+      const source = await this.getMessageSource(data)
+
+      if (source === MessageSource.Bot)
+        return {
+          body: {message: ResponseMessage.AlreadyDispatched},
+          init: {status: HttpResponseCode.AlreadyReported},
+        }
+
+      if (source === MessageSource.BusinessUser) {
+        await this.updateConversationStatus(conversationId, ConversationStatus.UserTookControl)
+        return {
+          body: {message: ResponseMessage.UserInChat},
+          init: {status: HttpResponseCode.Ok},
+        }
+      }
+
       if (!await this.hasActivePlan(whatsappId)) {
         return {
           body: {message: ResponseMessage.UnknownError},
@@ -74,35 +63,30 @@ export class WhatsappApiRouteController {
         }
       }
 
-      const fromMe = data.messages.key.fromMe
-      const fromSever = data.messages.sentFromServer
-      const source = await this.getMessageSource(fromMe, fromSever)
+      const conversationStatus = await this.getConversationStatus(conversationId)
 
-      if (source === MessageSource.Bot)
-        return {
-          body: {message: ResponseMessage.AlreadyDispatched},
-          init: {status: HttpResponseCode.AlreadyReported},
-        }
+      if (
+        conversationStatus == ConversationStatus.Idle ||
+        conversationStatus == ConversationStatus.MessageReceived ||
+        conversationStatus == ConversationStatus.BotResponded
+      ){
+        return this.handleCreateResponse(
+          whatsappId,
+          conversationId,
+          data as WebHookData,
+        )
+      }
 
-      if (source === MessageSource.BusinessUser)
+      if (conversationStatus == ConversationStatus.UserTookControl) {
         return {
-          body: {message: ResponseMessage.UserInChat},
+          body: {message: ResponseMessage.Responded},
           init: {status: HttpResponseCode.Ok},
         }
-
-      await this.updateConversationStatus(conversationId, ConversationStatus.MessageReceived)
-
-      const response = await this.getBestResponse()
-
-      const messageSent = await this.sendResponseMessage(whatsappId, data, response)
-
-      await this.updateConversationStatus(conversationId, ConversationStatus.BotResponded)
-
-      await this.increaseMessageCountUsage(whatsappId)
+      }
 
       return {
-        body: {message: ResponseMessage.Responded},
-        init: {status: HttpResponseCode.Ok},
+        body: {message: ResponseMessage.UnknownError},
+        init: {status: HttpResponseCode.ServerError},
       }
     } catch (exception) {
       if (exception instanceof HasActivePlanException) {
@@ -123,6 +107,27 @@ export class WhatsappApiRouteController {
     }
   }
 
+  private async handleCreateResponse(
+    whatsappId: string,
+    conversationId: string,
+    data: WebHookData,
+  ): Promise<RouteResponse> {
+    await this.updateConversationStatus(conversationId, ConversationStatus.MessageReceived)
+
+    const response = await this.getBestResponse()
+
+    console.log(await this.sendResponseMessage(whatsappId, data, response))
+
+    await this.updateConversationStatus(conversationId, ConversationStatus.BotResponded)
+
+    await this.increaseMessageCountUsage(whatsappId)
+
+    return {
+      body: {message: ResponseMessage.Responded},
+      init: {status: HttpResponseCode.Ok},
+    }
+  }
+
   private getChatId(schema: WebHookData): string {
     return schema.messages.key.remoteJid
   }
@@ -135,9 +140,14 @@ export class WhatsappApiRouteController {
     return this.composition.provideGetConversationStatusUseCase().execute(conversationId)
   }
 
-  private async getMessageSource(fromMe: boolean, fromServer: boolean): Promise<MessageSource> {
-    if (!fromMe) return MessageSource.Client
-    return fromServer ? MessageSource.Bot : MessageSource.BusinessUser
+  private async getMessageSource(data: WebHookData): Promise<MessageSource> {
+    const fromMe = data.messages.key.fromMe
+    const fromServer = data.messages.sentFromServer
+    const syncUpdate = data.messages.message.protocolMessage?.type === 'EPHEMERAL_SYNC_RESPONSE'
+
+    if (!fromMe && !syncUpdate) return MessageSource.Client
+    if (fromServer || syncUpdate) return MessageSource.Bot
+    return MessageSource.BusinessUser
   }
 
   private async hasActivePlan(whatsappId: string): Promise<boolean> {
@@ -171,6 +181,10 @@ export class WhatsappApiRouteController {
   }
 
   private async getBestResponse(): Promise<string> {
-    return "Foo"
+    return "Server generated response"
+  }
+
+  private isFromGroup(data: WebHookData): boolean  {
+    return data.messages.key.participant === null;
   }
 }

@@ -57,9 +57,11 @@ export interface WhatsappRepository {
    */
   increaseMessageCountUsage(whatsappId: string, amount: number): Promise<void>
 
-  getConversationId(whatsappId: string, chatId: string): Promise<string>
+  getConversationId(whatsappId: string, chatId: string): Promise<string | null>
 
   getBusinessHours(businessLocationId: string): Promise<object>
 
-  isNumberBlackListed(whatsappId:string, number: string): Promise<boolean>
+  isNumberBlackListed(whatsappId:string, contactId: string): Promise<boolean>
+
+  createConversation(whatsappId: string, chatId: string): Promise<string>;
 }

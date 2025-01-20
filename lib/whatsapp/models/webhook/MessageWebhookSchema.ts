@@ -31,6 +31,22 @@ export interface MessageContextInfo {
   deviceListMetadataVersion?: number;
 }
 
+export interface ProtocolMessageKey {
+  remoteJid: string;
+  fromMe: boolean;
+}
+
+export interface ProtocolMessage {
+  key: {
+    remoteJid: string;
+    fromMe: boolean;
+  };
+  type: string;
+  ephemeralExpiration: number;
+  ephemeralSettingTimestamp: string;
+  disappearingMode: DisappearingMode;
+}
+
 export interface StickerMessage {
   url: string;
   fileSha256: string;
@@ -62,6 +78,7 @@ export interface ReactionMessage {
 
 export interface MessageContent {
   conversation?: string;
+  protocolMessage?: ProtocolMessage;
   extendedTextMessage?: ExtendedTextMessage;
   messageContextInfo: MessageContextInfo;
   stickerMessage?: StickerMessage;

@@ -2,7 +2,8 @@ import {WhatsappRepository} from "@/lib/whatsapp/models/WhatsappRepository";
 
 export class GetConversationIdUseCase {
 
-  constructor(private readonly whatsappRepository: WhatsappRepository) {}
+  constructor(private readonly whatsappRepository: WhatsappRepository) {
+  }
 
   /**
    * Get the conversation id from the whatsapp id and chat id.
@@ -11,6 +12,12 @@ export class GetConversationIdUseCase {
    * @returns conversation id
    */
   async execute(whatsappId: string, chatId: string): Promise<string> {
-    return this.whatsappRepository.getConversationId(whatsappId, chatId);
+    const conversationId = await this.whatsappRepository.getConversationId(whatsappId, chatId);
+
+    if (conversationId !== null) { // @ts-ignore
+      return conversationId;
+    }
+
+    return await this.whatsappRepository.createConversation(whatsappId, chatId);
   }
 }

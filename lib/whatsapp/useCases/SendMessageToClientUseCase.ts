@@ -35,6 +35,7 @@ export class SendMessageToClientUseCase {
         {
           method: HttpMethod.POST,
           headers: {
+            [HttpHeader.XApiKey]: 'd4f7e8b9c2a1d3e4f5g6h7',
             [HttpHeader.ContentType]: ContentType.ApplicationJson,
           },
           body: JSON.stringify(body),

@@ -68,7 +68,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
         status: whatsappConversation.conversationStatus,
       })
       .from(whatsappConversation)
-      .where(and(eq(whatsappConversation.id, conversationId), isFalse(whatsapp.deleted)))
+      .where(and(eq(whatsappConversation.id, conversationId), isFalse(whatsappConversation.deleted)))
       .execute()
 
     if (result.length === 0)
@@ -125,8 +125,8 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .execute()
   }
 
-  async getConversationId(whatsappId: string, chatId: string): Promise<string> {
-    return (await this.db
+  async getConversationId(whatsappId: string, chatId: string): Promise<string | null> {
+    const result = await this.db
         .select({
           conversationId: whatsappConversation.id,
         })
@@ -139,7 +139,8 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
           ),
         )
         .execute()
-    )[0].conversationId
+
+    return result.length > 0 ? result[0].conversationId : null
   }
 
   async getBusinessHours(whatsappId: string): Promise<object> {
@@ -153,16 +154,29 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .execute()
   }
 
-  async isNumberBlackListed(whatsappId: string, number: string): Promise<boolean> {
+  async isNumberBlackListed(whatsappId: string, contactId: string): Promise<boolean> {
     const result = await this.db
       .select({})
       .from(whatsappContacts)
       .where(and(
-        eq(whatsappContacts.whatsappId, number),
+        eq(whatsappContacts.contactId, contactId),
         eq(whatsappContacts.whatsappId, whatsappId),
       ))
       .execute()
 
     return result.length > 0
+  }
+
+  async createConversation(whatsappId: string, chatId: string): Promise<string> {
+    const result = await this.db
+      .insert(whatsappConversation)
+      .values({
+        whatsappId,
+        chatId,
+        conversationStatus: ConversationStatus.MessageReceived,
+      })
+      .returning({ id: whatsappConversation.id })
+
+    return result[0].id
   }
 }
