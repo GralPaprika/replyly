@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Mitr:wght@200;300;400;500;600;700&display=swap');
+/* hsl(0deg 0% 14.9%) */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -29,12 +31,13 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --replyly: 154.55 100% 45.29%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 0 0% 11.76%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 0 0% 11.76%;
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
@@ -42,13 +45,13 @@
     --primary-foreground: 222.2 47.4% 11.2%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
+    --muted: 0 0% 9%;
     --muted-foreground: 215 20.2% 65.1%;
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
+    --border: 0 0% 28%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
     --chart-1: 220 70% 50%;
@@ -56,6 +59,7 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --replyly: 154.55 100% 45.29%;
   }
 }
 
@@ -70,6 +74,22 @@
 
 .activeLink span.text-active,
 .activeLink svg path {
-  stroke: #00e785;
-  color: #00e785;
+  stroke: hsl(var(--replyly));
+  color: hsl(var(--replyly));
+}
+
+.group\/sidebar.logout\/sidebar:hover span {
+  color: #ff0000;
+}
+
+.noneBar::-webkit-scrollbar {
+  display: none;
+}
+
+.linkInReplyly {
+  color: #53bdeb;
+}
+
+.linkInReplyly:hover {
+  text-decoration: underline;
 }
