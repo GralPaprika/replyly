@@ -11,6 +11,12 @@ export class GetConversationIdUseCase {
    * @returns conversation id
    */
   async execute(whatsappId: string, chatId: string): Promise<string> {
-    return this.whatsappRepository.getConversationId(whatsappId, chatId);
+    const conversationId = await this.whatsappRepository.getConversationId(whatsappId, chatId);
+
+    if (conversationId !== null) { // @ts-ignore
+      return conversationId;
+    }
+
+    return await this.whatsappRepository.createConversation(whatsappId, chatId);
   }
 }

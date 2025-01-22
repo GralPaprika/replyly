@@ -2,6 +2,7 @@ import {NextResponse} from "next/server";
 import {HttpResponseCode} from "@/lib/common/models/HttpResponseCode";
 import {WhatsappRouteComposition} from "@/composition/WhatsappRouteComposition";
 import {WhatsappApiRouteController} from "@/lib/whatsapp/controllers/WhatsappApiRouteController";
+import {MessageWebhookSchema} from "@/lib/whatsapp/models/webhook/MessageWebhookSchema";
 
 /**
  * This HTTP Method for endpoint is development only, it will be removed before release.
@@ -18,16 +19,14 @@ export async function GET(request: Request, {params}: { params: Promise<{ id: st
 
   const controller = new WhatsappApiRouteController(WhatsappRouteComposition.provideInstance())
 
-  const responses = await controller.getResponsesForPrompt(whatsappId, "Dirección")
-
   return NextResponse.json(
-    responses,
+    {message: "received"},
     {status: HttpResponseCode.AlreadyReported},
   )
 }
 
 /**
- * This method captures messages received and sent from a whatsapp number through the Whapi service.
+ * This method captures messages received and sent from a whatsapp number.
  *
  * It is required to be HTTP POST method.
  *
@@ -37,13 +36,13 @@ export async function POST(request: Request, {params}: { params: { id: string } 
   // Route parameter
   const whatsappId = params.id
 
-  // Request body to cast it as needed to process the messages. This is because the Whapi service sends the messages and
-  // status updates in a specific format for each case.
-  const data: any = await request.json()
+  const webhookSchema: MessageWebhookSchema = await request.json()
 
   const controller = new WhatsappApiRouteController(WhatsappRouteComposition.provideInstance())
 
-  const {body, init} = await controller.processMessage(whatsappId, data)
+  console.log('received', JSON.stringify(webhookSchema, null, 2))
 
-  NextResponse.json(body, init)
+  const {body, init} = await controller.processMessage(whatsappId, webhookSchema.data)
+
+  return NextResponse.json(body, init)
 }

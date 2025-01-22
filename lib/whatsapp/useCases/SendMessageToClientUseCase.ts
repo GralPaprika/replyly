@@ -1,40 +1,46 @@
-import {WhatsappRepository} from "@/lib/whatsapp/models/WhatsappRepository";
 import {HttpMethod} from "@/lib/common/models/HttpMethod";
 import {ContentType} from "@/lib/common/models/ContentType";
 import {HttpHeader} from "@/lib/common/models/HttpHeader";
 import {SendMessageRequestSchema} from "@/lib/whatsapp/models/message/SendMessageRequestSchema";
-import {SentMessageResponseSchema} from "@/lib/whatsapp/models/message/SentMessageResponseSchema";
+import {SendMessageResponseSchema} from "@/lib/whatsapp/models/message/SendMessageResponseSchema";
 import {Exception} from "@/lib/common/models/Exception";
-
-const URL = 'https://gate.whapi.cloud/messages/text'
 
 export class SendMessageToClientException implements Exception {
   constructor(readonly message: string) {}
 }
 
-export class SendMessageToClientUseCase {
-  constructor(private readonly whatsappRepository: WhatsappRepository) {}
+const URL = process.env.WHATSAPP_SERVICE ?? 'localhost:3030'
 
+export class SendMessageToClientUseCase {
   /**
    * Send a message to a specific recipient using whatsapp channel.
-   * @param whatsappId The ID of the whatsapp channel.
-   * @param recipientId The ID of the recipient (format provided by Whapi).
+   * @param senderID The ID of the sender (a replyly user).
+   * @param recipientId The ID of the recipient (WhatsApp format: 0001112222@x.yyy.zzz).
    * @param message The message to be sent.
-   * @returns {Promise<SentMessageResponseSchema>}
+   * @param chatEphemeralExpiration
+   * @returns {Promise<SendMessageResponseSchema>}
    * @throws {SendMessageToClientException}
    */
-  async execute(whatsappId: string, recipientId: string, message: string): Promise<SentMessageResponseSchema> {
+  async execute(senderID: string, recipientId: string, message: string, chatEphemeralExpiration: number | undefined): Promise<SendMessageResponseSchema> {
     try {
-      const token = await this.whatsappRepository.getWhatsappTokenByWhatsappId(whatsappId)
-      const body: SendMessageRequestSchema = { to: recipientId, body: message }
+      const body: SendMessageRequestSchema = {
+        jid: recipientId,
+        type: 'number',
+        message: {
+          text: message,
+        },
+        options: {
+          ephemeralExpiration: chatEphemeralExpiration,
+        }
+      }
 
       const response = await fetch(
-        URL,
+        `${URL}/${senderID}/messages/send`,
         {
           method: HttpMethod.POST,
           headers: {
+            [HttpHeader.XApiKey]: 'd4f7e8b9c2a1d3e4f5g6h7',
             [HttpHeader.ContentType]: ContentType.ApplicationJson,
-            [HttpHeader.Authorization]: `Bearer ${token}`,
           },
           body: JSON.stringify(body),
         }

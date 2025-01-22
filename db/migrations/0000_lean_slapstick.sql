@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS "business_locations" (
 	"name" text NOT NULL,
 	"business_id" uuid NOT NULL,
 	"is_global" boolean NOT NULL,
+	"schedule" jsonb NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"deleted" boolean DEFAULT false NOT NULL
 );
@@ -30,13 +31,6 @@ CREATE TABLE IF NOT EXISTS "business_plan" (
 	"active" boolean DEFAULT true NOT NULL,
 	"plan_limit" integer,
 	"usage" integer DEFAULT 0 NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "business_responses" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"content" text NOT NULL,
-	"metadata" jsonb NOT NULL,
-	"vector" vector(1536) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "business_users_locations" (
@@ -102,13 +96,6 @@ CREATE TABLE IF NOT EXISTS "regions" (
 	"deleted" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "schedules" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"business_location_id" uuid NOT NULL,
-	"schedule" jsonb NOT NULL,
-	"deleted" boolean DEFAULT false NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text,
@@ -125,29 +112,27 @@ CREATE TABLE IF NOT EXISTS "whatsapp" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"business_location_id" uuid NOT NULL,
 	"phone_number" text NOT NULL,
-	"token" text NOT NULL,
 	"session_status" integer NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
+	"deleted" boolean DEFAULT false NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "whatsappContacts" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"contact_id" text NOT NULL,
+	"name" text NOT NULL,
+	"image_url" text,
+	"whatsapp_id" uuid NOT NULL,
+	"on_blacklist" boolean DEFAULT false NOT NULL,
 	"deleted" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "whatsapp_conversation" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"whatsapp_id" uuid NOT NULL,
-	"whapi_chat_id" text NOT NULL,
+	"chatId" text NOT NULL,
 	"conversation_status" integer NOT NULL,
 	"deleted" boolean DEFAULT false NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "whatsapp_messages" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"whatsapp_conversation_id" uuid NOT NULL,
-	"content" text NOT NULL,
-	"sent_at" timestamp DEFAULT now() NOT NULL,
-	"whapi_message_id" text,
-	"whapi_chat_id" text,
-	"status" integer NOT NULL,
-	"source" integer NOT NULL
 );
 --> statement-breakpoint
 DO $$ BEGIN
@@ -217,12 +202,6 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "schedules" ADD CONSTRAINT "schedules_business_location_id_business_locations_id_fk" FOREIGN KEY ("business_location_id") REFERENCES "public"."business_locations"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
  ALTER TABLE "users" ADD CONSTRAINT "users_business_id_businesses_id_fk" FOREIGN KEY ("business_id") REFERENCES "public"."businesses"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -235,13 +214,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "whatsapp_conversation" ADD CONSTRAINT "whatsapp_conversation_whatsapp_id_whatsapp_id_fk" FOREIGN KEY ("whatsapp_id") REFERENCES "public"."whatsapp"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "whatsappContacts" ADD CONSTRAINT "whatsappContacts_whatsapp_id_whatsapp_id_fk" FOREIGN KEY ("whatsapp_id") REFERENCES "public"."whatsapp"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "whatsapp_messages" ADD CONSTRAINT "whatsapp_messages_whatsapp_conversation_id_whatsapp_conversation_id_fk" FOREIGN KEY ("whatsapp_conversation_id") REFERENCES "public"."whatsapp_conversation"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "whatsapp_conversation" ADD CONSTRAINT "whatsapp_conversation_whatsapp_id_whatsapp_id_fk" FOREIGN KEY ("whatsapp_id") REFERENCES "public"."whatsapp"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

@@ -1,4 +1,4 @@
 export enum HttpHeader {
-  Authorization = 'Authorization',
+  XApiKey = 'X-API-Key',
   ContentType = 'Content-Type',
 }

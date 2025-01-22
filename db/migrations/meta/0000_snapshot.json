@@ -1,5 +1,5 @@
 {
-  "id": "4f97e6b8-4cb8-42e8-9c4d-53290c353330",
+  "id": "dd5fbbd7-877c-47b4-9692-7efcb341497a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -114,6 +114,12 @@
         "is_global": {
           "name": "is_global",
           "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "schedule": {
+          "name": "schedule",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": true
         },
@@ -239,44 +245,6 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.business_responses": {
-      "name": "business_responses",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "content": {
-          "name": "content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "metadata": {
-          "name": "metadata",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "vector": {
-          "name": "vector",
-          "type": "vector(1536)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -748,59 +716,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.schedules": {
-      "name": "schedules",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "business_location_id": {
-          "name": "business_location_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "schedule": {
-          "name": "schedule",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "deleted": {
-          "name": "deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "schedules_business_location_id_business_locations_id_fk": {
-          "name": "schedules_business_location_id_business_locations_id_fk",
-          "tableFrom": "schedules",
-          "tableTo": "business_locations",
-          "columnsFrom": [
-            "business_location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.users": {
       "name": "users",
       "schema": "",
@@ -909,12 +824,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "token": {
-          "name": "token",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "session_status": {
           "name": "session_status",
           "type": "integer",
@@ -958,6 +867,78 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.whatsappContacts": {
+      "name": "whatsappContacts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "contact_id": {
+          "name": "contact_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "whatsapp_id": {
+          "name": "whatsapp_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "on_blacklist": {
+          "name": "on_blacklist",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "deleted": {
+          "name": "deleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "whatsappContacts_whatsapp_id_whatsapp_id_fk": {
+          "name": "whatsappContacts_whatsapp_id_whatsapp_id_fk",
+          "tableFrom": "whatsappContacts",
+          "tableTo": "whatsapp",
+          "columnsFrom": [
+            "whatsapp_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.whatsapp_conversation": {
       "name": "whatsapp_conversation",
       "schema": "",
@@ -975,8 +956,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "whapi_chat_id": {
-          "name": "whapi_chat_id",
+        "chatId": {
+          "name": "chatId",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -1003,83 +984,6 @@
           "tableTo": "whatsapp",
           "columnsFrom": [
             "whatsapp_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.whatsapp_messages": {
-      "name": "whatsapp_messages",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "whatsapp_conversation_id": {
-          "name": "whatsapp_conversation_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "content": {
-          "name": "content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "sent_at": {
-          "name": "sent_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "whapi_message_id": {
-          "name": "whapi_message_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "whapi_chat_id": {
-          "name": "whapi_chat_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "source": {
-          "name": "source",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "whatsapp_messages_whatsapp_conversation_id_whatsapp_conversation_id_fk": {
-          "name": "whatsapp_messages_whatsapp_conversation_id_whatsapp_conversation_id_fk",
-          "tableFrom": "whatsapp_messages",
-          "tableTo": "whatsapp_conversation",
-          "columnsFrom": [
-            "whatsapp_conversation_id"
           ],
           "columnsTo": [
             "id"
