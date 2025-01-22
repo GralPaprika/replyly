@@ -17,16 +17,20 @@ export class SendMessageToClientUseCase {
    * @param senderID The ID of the sender (a replyly user).
    * @param recipientId The ID of the recipient (WhatsApp format: 0001112222@x.yyy.zzz).
    * @param message The message to be sent.
+   * @param chatEphemeralExpiration
    * @returns {Promise<SendMessageResponseSchema>}
    * @throws {SendMessageToClientException}
    */
-  async execute(senderID: string, recipientId: string, message: string): Promise<SendMessageResponseSchema> {
+  async execute(senderID: string, recipientId: string, message: string, chatEphemeralExpiration: number | undefined): Promise<SendMessageResponseSchema> {
     try {
       const body: SendMessageRequestSchema = {
         jid: recipientId,
         type: 'number',
         message: {
           text: message,
+        },
+        options: {
+          ephemeralExpiration: chatEphemeralExpiration,
         }
       }
 

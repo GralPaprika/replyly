@@ -31,6 +31,10 @@ export interface MessageContextInfo {
   deviceListMetadataVersion?: number;
 }
 
+export interface EphemeralMessage {
+  message: MessageContent;
+}
+
 export interface ProtocolMessageKey {
   remoteJid: string;
   fromMe: boolean;
@@ -81,6 +85,7 @@ export interface MessageContent {
   protocolMessage?: ProtocolMessage;
   extendedTextMessage?: ExtendedTextMessage;
   messageContextInfo: MessageContextInfo;
+  ephemeralMessage?: EphemeralMessage;
   stickerMessage?: StickerMessage;
   senderKeyDistributionMessage?: SenderKeyDistributionMessage;
   reactionMessage?: ReactionMessage;

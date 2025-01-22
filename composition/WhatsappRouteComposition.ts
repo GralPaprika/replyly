@@ -10,10 +10,14 @@ import {IncreaseMessageCountUsageUseCase} from "@/lib/whatsapp/useCases/Increase
 import {GetConversationIdUseCase} from "@/lib/whatsapp/useCases/GetConversationIdUseCase";
 import {IsTimeWithinLocationBusinessHoursUseCase} from "@/lib/whatsapp/useCases/IsTimeWithinLocationBusinessHoursUseCase";
 import {IsNumberBlackListedUseCase} from "@/lib/whatsapp/useCases/IsNumberBlackListedUseCase";
+import {ScheduleBotResetUseCase} from "@/lib/whatsapp/useCases/ScheduleBotResetUseCase";
+import {SchedulerRepository} from "@/lib/scheduler/SchedulerRepository";
+import {SchedulerRepositoryImpl} from "@/lib/scheduler/SchedulerRepositoryImpl";
 
 export class WhatsappRouteComposition {
   private readonly appCompositionRoot: AppComposition
   private whatsappRepository!: WhatsappRepository
+  private schedulerRepository!: SchedulerRepository
   private hasActivePlanUseCase!: HasActivePlanUseCase
   private getConversationStatusUseCase!: GetConversationStatusUseCase
   private updateConversationStatusUseCase!: UpdateConversationStatusUseCase
@@ -22,6 +26,7 @@ export class WhatsappRouteComposition {
   private getConversationIdUseCase!: GetConversationIdUseCase
   private timeWithinLocationBusinessHoursUseCase!: IsTimeWithinLocationBusinessHoursUseCase
   private isNumberBlackListedUseCase!: IsNumberBlackListedUseCase
+  private scheduleBotResetUseCase!: ScheduleBotResetUseCase
 
   constructor(appCompositionRoot: AppComposition) {
     this.appCompositionRoot = appCompositionRoot
@@ -33,6 +38,10 @@ export class WhatsappRouteComposition {
 
   private provideWhatsappRepository(): WhatsappRepository {
     return this.whatsappRepository ??= new WhatsappRepositoryImpl(this.appCompositionRoot.getDatabase())
+  }
+
+  private provideSchedulerRepository(): SchedulerRepository {
+    return this.schedulerRepository ??= new SchedulerRepositoryImpl()
   }
 
   private provideDeactivatePlanUseCase(): DeactivatePlanUseCase {
@@ -75,5 +84,10 @@ export class WhatsappRouteComposition {
   provideIsNumberBlackListedUseCase(): IsNumberBlackListedUseCase {
     return this.isNumberBlackListedUseCase ??=
       new IsNumberBlackListedUseCase(this.provideWhatsappRepository())
+  }
+
+  provideScheduleBotResetUseCase(): ScheduleBotResetUseCase {
+    return this.scheduleBotResetUseCase ??=
+      new ScheduleBotResetUseCase(this.provideUpdateConversationStatusUseCase(), this.provideSchedulerRepository())
   }
 }

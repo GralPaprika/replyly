@@ -122,6 +122,8 @@ export class WhatsappApiRouteController {
 
     await this.increaseMessageCountUsage(whatsappId)
 
+    this.scheduleBotReset(conversationId)
+
     return {
       body: {message: ResponseMessage.Responded},
       init: {status: HttpResponseCode.Ok},
@@ -158,8 +160,8 @@ export class WhatsappApiRouteController {
     await this.composition.provideUpdateConversationStatusUseCase().execute(conversationId, status)
   }
 
-  private async isMessageReceivedWithWorkingHours(whatsappId: string) {
-    return await this.composition.provideTimeWithinLocationBusinessHoursUseCase().execute(whatsappId)
+  private scheduleBotReset(conversationId: string) {
+    this.composition.provideScheduleBotResetUseCase().execute(conversationId)
   }
 
   private async sendResponseMessage(
@@ -168,7 +170,8 @@ export class WhatsappApiRouteController {
     content: string,
   ): Promise<SendMessageResponseSchema> {
     const recipientId = data.messages.key.remoteJid
-    return await this.composition.provideSendMessageToClientUseCase().execute(whatsappId, recipientId, content)
+    const expiration = data.messages.message.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.expiration
+    return await this.composition.provideSendMessageToClientUseCase().execute(whatsappId, recipientId, content, expiration)
   }
 
   private async increaseMessageCountUsage(whatsappId: string): Promise<void> {

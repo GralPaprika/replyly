@@ -4,8 +4,13 @@ export interface Message {
   text: string,
 }
 
+export interface MessageConfigOptions {
+  ephemeralExpiration?: number,
+}
+
 export interface SendMessageRequestSchema {
   jid: string
   type: MessageType
-  message: Message
+  message: Message,
+  options?: MessageConfigOptions,
 }

@@ -2,8 +2,7 @@ import {WhatsappRepository} from "@/lib/whatsapp/models/WhatsappRepository";
 
 export class GetConversationIdUseCase {
 
-  constructor(private readonly whatsappRepository: WhatsappRepository) {
-  }
+  constructor(private readonly whatsappRepository: WhatsappRepository) {}
 
   /**
    * Get the conversation id from the whatsapp id and chat id.
