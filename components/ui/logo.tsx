@@ -1,16 +1,33 @@
-import { Flex, Box, Text } from "@radix-ui/themes";
-import { Tooltip } from "@nextui-org/react";
+import { Flex, Text } from '@radix-ui/themes';
+import IconReplyly from '../icons/IcontReplyly';
+import animation from '@/app/styles/logo.module.css';
 
-import IconReplyly from "../icons/IcontReplyly";
+interface LogoReplylyProps extends React.HTMLAttributes<HTMLDivElement> {
+    sizeIcon?: string;
+    textSize?: string;
+}
 
-import animation from '@/app/styles/logo.module.css'
+export default function LogoReplyly({
+    sizeIcon = '3em',
+    textSize = '1.6rem',
+    ...props
+}: LogoReplylyProps) {
+    const responsiveSizeIcon = `calc(${sizeIcon} + 1vw)`;
+    const responsiveTextSize = `calc(${textSize} + 0.5vw)`;
 
-
-export default function LogoReplyly({ sizeIcon = '3em' }: { sizeIcon?: string }) {
     return (
-        <Flex align='center' gap='1.1rem'>
-            <IconReplyly className={animation.animationLoadNova} size={sizeIcon}  />
-            <Text className={animation.titleLogo}>Replyly</Text>
+        <Flex align='center' gap='1.1rem' {...props}>
+            <IconReplyly
+                className={animation.animationLoadNova}
+                size={responsiveSizeIcon}
+            />
+            <Text
+                className={animation.titleLogo}
+                style={{ fontSize: responsiveTextSize }}
+            >
+                Replyly
+            </Text>
         </Flex>
     );
 }
+

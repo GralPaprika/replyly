@@ -1,0 +1,391 @@
+{
+    "userId": "12345",
+    "channels": {
+        "whatsapp": {
+            "totalMessagesSent": 21972,
+            "dailyData": [
+                {
+                    "date": "2024-02-01",
+                    "messagesSent": 1028
+                },
+                {
+                    "date": "2024-02-02",
+                    "messagesSent": 413
+                },
+                {
+                    "date": "2024-02-03",
+                    "messagesSent": 1136
+                },
+                {
+                    "date": "2024-02-04",
+                    "messagesSent": 533
+                },
+                {
+                    "date": "2024-02-05",
+                    "messagesSent": 825
+                },
+                {
+                    "date": "2024-02-06",
+                    "messagesSent": 358
+                },
+                {
+                    "date": "2024-02-07",
+                    "messagesSent": 777
+                },
+                {
+                    "date": "2024-02-08",
+                    "messagesSent": 953
+                },
+                {
+                    "date": "2024-02-09",
+                    "messagesSent": 1006
+                },
+                {
+                    "date": "2024-02-10",
+                    "messagesSent": 866
+                },
+                {
+                    "date": "2024-02-11",
+                    "messagesSent": 939
+                },
+                {
+                    "date": "2024-02-12",
+                    "messagesSent": 730
+                },
+                {
+                    "date": "2024-02-13",
+                    "messagesSent": 573
+                },
+                {
+                    "date": "2024-02-14",
+                    "messagesSent": 801
+                },
+                {
+                    "date": "2024-02-15",
+                    "messagesSent": 994
+                },
+                {
+                    "date": "2024-02-16",
+                    "messagesSent": 278
+                },
+                {
+                    "date": "2024-02-17",
+                    "messagesSent": 463
+                },
+                {
+                    "date": "2024-02-18",
+                    "messagesSent": 724
+                },
+                {
+                    "date": "2024-02-19",
+                    "messagesSent": 830
+                },
+                {
+                    "date": "2024-02-20",
+                    "messagesSent": 889
+                },
+                {
+                    "date": "2024-02-21",
+                    "messagesSent": 601
+                },
+                {
+                    "date": "2024-02-22",
+                    "messagesSent": 1008
+                },
+                {
+                    "date": "2024-02-23",
+                    "messagesSent": 741
+                },
+                {
+                    "date": "2024-02-24",
+                    "messagesSent": 608
+                },
+                {
+                    "date": "2024-02-25",
+                    "messagesSent": 394
+                },
+                {
+                    "date": "2024-02-26",
+                    "messagesSent": 823
+                },
+                {
+                    "date": "2024-02-27",
+                    "messagesSent": 508
+                },
+                {
+                    "date": "2024-02-28",
+                    "messagesSent": 1044
+                },
+                {
+                    "date": "2024-02-29",
+                    "messagesSent": 1129
+                }
+            ],
+            "weeklyData": [
+                {
+                    "date": "2024-02-01",
+                    "messagesSent": 5070
+                },
+                {
+                    "date": "2024-02-08",
+                    "messagesSent": 5868
+                },
+                {
+                    "date": "2024-02-15",
+                    "messagesSent": 4779
+                },
+                {
+                    "date": "2024-02-22",
+                    "messagesSent": 5126
+                },
+                {
+                    "date": "2024-02-29",
+                    "messagesSent": 1129
+                }
+            ],
+            "monthlyData": [
+                {
+                    "date": "2024-01",
+                    "messagesSent": 38336
+                },
+                {
+                    "date": "2023-12",
+                    "messagesSent": 33043
+                },
+                {
+                    "date": "2023-11",
+                    "messagesSent": 35872
+                },
+                {
+                    "date": "2023-10",
+                    "messagesSent": 13141
+                },
+                {
+                    "date": "2023-09",
+                    "messagesSent": 28677
+                },
+                {
+                    "date": "2023-08",
+                    "messagesSent": 26655
+                },
+                {
+                    "date": "2023-07",
+                    "messagesSent": 29543
+                },
+                {
+                    "date": "2023-06",
+                    "messagesSent": 17891
+                },
+                {
+                    "date": "2023-05",
+                    "messagesSent": 13996
+                },
+                {
+                    "date": "2023-04",
+                    "messagesSent": 12830
+                },
+                {
+                    "date": "2023-03",
+                    "messagesSent": 19556
+                },
+                {
+                    "date": "2023-02",
+                    "messagesSent": 29778
+                }
+            ]
+        },
+        "facebook": {
+            "totalMessagesSent": 21516,
+            "dailyData": [
+                {
+                    "date": "2024-02-01",
+                    "messagesSent": 843
+                },
+                {
+                    "date": "2024-02-02",
+                    "messagesSent": 1152
+                },
+                {
+                    "date": "2024-02-03",
+                    "messagesSent": 834
+                },
+                {
+                    "date": "2024-02-04",
+                    "messagesSent": 729
+                },
+                {
+                    "date": "2024-02-05",
+                    "messagesSent": 810
+                },
+                {
+                    "date": "2024-02-06",
+                    "messagesSent": 851
+                },
+                {
+                    "date": "2024-02-07",
+                    "messagesSent": 278
+                },
+                {
+                    "date": "2024-02-08",
+                    "messagesSent": 458
+                },
+                {
+                    "date": "2024-02-09",
+                    "messagesSent": 633
+                },
+                {
+                    "date": "2024-02-10",
+                    "messagesSent": 574
+                },
+                {
+                    "date": "2024-02-11",
+                    "messagesSent": 773
+                },
+                {
+                    "date": "2024-02-12",
+                    "messagesSent": 311
+                },
+                {
+                    "date": "2024-02-13",
+                    "messagesSent": 1155
+                },
+                {
+                    "date": "2024-02-14",
+                    "messagesSent": 992
+                },
+                {
+                    "date": "2024-02-15",
+                    "messagesSent": 787
+                },
+                {
+                    "date": "2024-02-16",
+                    "messagesSent": 364
+                },
+                {
+                    "date": "2024-02-17",
+                    "messagesSent": 1180
+                },
+                {
+                    "date": "2024-02-18",
+                    "messagesSent": 688
+                },
+                {
+                    "date": "2024-02-19",
+                    "messagesSent": 503
+                },
+                {
+                    "date": "2024-02-20",
+                    "messagesSent": 1126
+                },
+                {
+                    "date": "2024-02-21",
+                    "messagesSent": 576
+                },
+                {
+                    "date": "2024-02-22",
+                    "messagesSent": 834
+                },
+                {
+                    "date": "2024-02-23",
+                    "messagesSent": 712
+                },
+                {
+                    "date": "2024-02-24",
+                    "messagesSent": 813
+                },
+                {
+                    "date": "2024-02-25",
+                    "messagesSent": 1135
+                },
+                {
+                    "date": "2024-02-26",
+                    "messagesSent": 1008
+                },
+                {
+                    "date": "2024-02-27",
+                    "messagesSent": 709
+                },
+                {
+                    "date": "2024-02-28",
+                    "messagesSent": 420
+                },
+                {
+                    "date": "2024-02-29",
+                    "messagesSent": 268
+                }
+            ],
+            "weeklyData": [
+                {
+                    "date": "2024-02-01",
+                    "messagesSent": 5497
+                },
+                {
+                    "date": "2024-02-08",
+                    "messagesSent": 4896
+                },
+                {
+                    "date": "2024-02-15",
+                    "messagesSent": 5224
+                },
+                {
+                    "date": "2024-02-22",
+                    "messagesSent": 5631
+                },
+                {
+                    "date": "2024-02-29",
+                    "messagesSent": 268
+                }
+            ],
+            "monthlyData": [
+                {
+                    "date": "2024-01",
+                    "messagesSent": 32868
+                },
+                {
+                    "date": "2023-12",
+                    "messagesSent": 22721
+                },
+                {
+                    "date": "2023-11",
+                    "messagesSent": 24199
+                },
+                {
+                    "date": "2023-10",
+                    "messagesSent": 38749
+                },
+                {
+                    "date": "2023-09",
+                    "messagesSent": 25440
+                },
+                {
+                    "date": "2023-08",
+                    "messagesSent": 29411
+                },
+                {
+                    "date": "2023-07",
+                    "messagesSent": 20568
+                },
+                {
+                    "date": "2023-06",
+                    "messagesSent": 27900
+                },
+                {
+                    "date": "2023-05",
+                    "messagesSent": 26032
+                },
+                {
+                    "date": "2023-04",
+                    "messagesSent": 25658
+                },
+                {
+                    "date": "2023-03",
+                    "messagesSent": 36707
+                },
+                {
+                    "date": "2023-02",
+                    "messagesSent": 30942
+                }
+            ]
+        }
+    }
+}
