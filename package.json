@@ -2,6 +2,9 @@
   "name": "replyly",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "llm-replyly"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -48,12 +51,15 @@
     "clsx": "^2.1.1",
     "daisyui": "^4.12.13",
     "file-saver": "^2.0.5",
+    "drizzle-orm": "^0.36.3",
     "framer-motion": "^11.11.9",
     "lowlight": "^3.1.0",
     "lucide-react": "^0.453.0",
     "micro": "^10.0.1",
     "next": "^14.2.15",
     "next-themes": "^0.3.0",
+    "pg": "^8.13.1",
+    "postgres": "^3.4.5",
     "react": "^18",
     "react-dom": "^18",
     "react-draggable": "^4.4.6",
@@ -74,6 +80,7 @@
     "@types/react-resizable": "^3.0.8",
     "@types/tailwindcss": "^3.0.11",
     "@types/turndown": "^5.0.5",
+    "drizzle-kit": "^0.28.1",
     "eslint": "^8",
     "eslint-config-next": "14.2.15",
     "postcss": "^8",

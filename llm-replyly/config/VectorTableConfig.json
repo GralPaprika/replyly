@@ -1,0 +1,10 @@
+{
+  "tableName": "business_responses",
+  "columns": {
+    "idColumnName": "id",
+    "vectorColumnName": "vector",
+    "contentColumnName": "content",
+    "metadataColumnName": "metadata"
+  },
+  "distanceStrategy": "cosine"
+}
