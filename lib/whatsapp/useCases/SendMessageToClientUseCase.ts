@@ -9,7 +9,8 @@ export class SendMessageToClientException implements Exception {
   constructor(readonly message: string) {}
 }
 
-const URL = process.env.WHATSAPP_SERVICE ?? 'localhost:3030'
+const URL = process.env.WHATSAPP_SERVICE ?? 'http://localhost:3030'
+const API_KEY = process.env.WHATSAPP_API_KEY ?? 'error'
 
 export class SendMessageToClientUseCase {
   /**
@@ -39,7 +40,7 @@ export class SendMessageToClientUseCase {
         {
           method: HttpMethod.POST,
           headers: {
-            [HttpHeader.XApiKey]: 'd4f7e8b9c2a1d3e4f5g6h7',
+            [HttpHeader.XApiKey]: API_KEY,
             [HttpHeader.ContentType]: ContentType.ApplicationJson,
           },
           body: JSON.stringify(body),

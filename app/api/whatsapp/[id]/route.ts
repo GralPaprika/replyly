@@ -40,8 +40,6 @@ export async function POST(request: Request, {params}: { params: { id: string } 
 
   const controller = new WhatsappApiRouteController(WhatsappRouteComposition.provideInstance())
 
-  console.log('received', JSON.stringify(webhookSchema, null, 2))
-
   const {body, init} = await controller.processMessage(whatsappId, webhookSchema.data)
 
   return NextResponse.json(body, init)

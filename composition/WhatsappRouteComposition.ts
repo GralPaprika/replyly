@@ -13,6 +13,7 @@ import {IsNumberBlackListedUseCase} from "@/lib/whatsapp/useCases/IsNumberBlackL
 import {ScheduleBotResetUseCase} from "@/lib/whatsapp/useCases/ScheduleBotResetUseCase";
 import {SchedulerRepository} from "@/lib/scheduler/SchedulerRepository";
 import {SchedulerRepositoryImpl} from "@/lib/scheduler/SchedulerRepositoryImpl";
+import {GetBestResponseUseCase} from "@/lib/whatsapp/useCases/GetBestResponseUseCase";
 
 export class WhatsappRouteComposition {
   private readonly appCompositionRoot: AppComposition
@@ -27,6 +28,7 @@ export class WhatsappRouteComposition {
   private timeWithinLocationBusinessHoursUseCase!: IsTimeWithinLocationBusinessHoursUseCase
   private isNumberBlackListedUseCase!: IsNumberBlackListedUseCase
   private scheduleBotResetUseCase!: ScheduleBotResetUseCase
+  private getBestResponseUseCase!: GetBestResponseUseCase
 
   constructor(appCompositionRoot: AppComposition) {
     this.appCompositionRoot = appCompositionRoot
@@ -89,5 +91,9 @@ export class WhatsappRouteComposition {
   provideScheduleBotResetUseCase(): ScheduleBotResetUseCase {
     return this.scheduleBotResetUseCase ??=
       new ScheduleBotResetUseCase(this.provideUpdateConversationStatusUseCase(), this.provideSchedulerRepository())
+  }
+
+  provideGetBestResponseUseCase() {
+    return this.getBestResponseUseCase ??= new GetBestResponseUseCase()
   }
 }
