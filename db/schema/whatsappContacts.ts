@@ -1,7 +1,7 @@
 import {boolean, pgTable, text, uuid} from "drizzle-orm/pg-core";
 import {whatsapp} from "@/db/schema/whatsapp";
 
-export const whatsappContacts =  pgTable('whatsappContacts', {
+export const whatsappContacts =  pgTable('whatsapp_contacts', {
   id: uuid('id').defaultRandom().primaryKey(),
   contactId: text('contact_id').notNull(),
   name: text('name').notNull(),
