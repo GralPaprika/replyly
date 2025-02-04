@@ -6,6 +6,7 @@ import {SendMessageResponseSchema} from "@/lib/whatsapp/models/message/SendMessa
 import {RouteResponse} from "@/lib/whatsapp/models/RouteResponse";
 import {HttpResponseCode} from "@/lib/common/models/HttpResponseCode";
 import {HasActivePlanException} from "@/lib/whatsapp/useCases/HasActivePlanUseCase";
+import {BotWebhookRequest} from "@/lib/whatsapp/models/botservice/BotWebhookRequest";
 
 enum ResponseMessage {
   AlreadyDispatched = 'Already dispatched',
@@ -114,7 +115,11 @@ export class WhatsappApiRouteController {
   ): Promise<RouteResponse> {
     await this.updateConversationStatus(conversationId, ConversationStatus.MessageReceived)
 
-    const response = await this.getBestResponse()
+    const response = await this.getBestResponse({
+      id: whatsappId,
+      whatsappId: '',
+      message: data.messages.message.ephemeralMessage?.message?.extendedTextMessage?.text,
+    })
 
     console.log(await this.sendResponseMessage(whatsappId, data, response))
 
@@ -183,8 +188,8 @@ export class WhatsappApiRouteController {
     return await this.composition.provideIsNumberBlackListedUseCase().execute(whatsappId, sender)
   }
 
-  private async getBestResponse(): Promise<string> {
-    return "Server generated response"
+  private async getBestResponse(requestData: BotWebhookRequest): Promise<string> {
+    return await this.composition.provideGetBestResponseUseCase().execute(requestData)
   }
 
   private isFromGroup(data: WebHookData): boolean  {
