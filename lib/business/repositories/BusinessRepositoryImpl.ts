@@ -13,6 +13,7 @@ import {networksPerBusiness} from "@/db/schema/networksPerBusiness";
 import { network } from "@/db/schema/network";
 import {businessUsersLocations} from "@/db/schema/businessUsersLocations";
 import {isFalse} from "@/lib/common/helpers/DatabaseFunctions";
+import {whatsapp} from "@/db/schema/whatsapp";
 
 export class BusinessRepositoryImpl implements BusinessRepository {
   constructor(private readonly db: PostgresJsDatabase) {}
@@ -82,5 +83,15 @@ export class BusinessRepositoryImpl implements BusinessRepository {
     )[0].id
 
     await this.db.insert(networksPerBusiness).values({businessId, networkId})
+  }
+
+  async addWhatsapp(locationId: string, phone: string): Promise<string> {
+    const result = await this.db
+      .insert(whatsapp)
+      .values({businessLocationId: locationId, phoneNumber: phone, sessionStatus: 0})
+      .returning({ id: whatsapp.id })
+      .execute()
+
+    return result[0].id
   }
 }

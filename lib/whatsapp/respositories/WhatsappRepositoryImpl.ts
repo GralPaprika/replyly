@@ -37,7 +37,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .from(whatsapp)
       .innerJoin(
         businessLocations,
-        and(eq(whatsapp.businessesLocationId, businessLocations.id), isFalse(businessLocations.deleted)),
+        and(eq(whatsapp.businessLocationId, businessLocations.id), isFalse(businessLocations.deleted)),
       )
       .innerJoin(
         businessPlan,
@@ -93,7 +93,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
         .from(whatsapp)
         .innerJoin(
           businessLocations,
-          and(eq(whatsapp.businessesLocationId, businessLocations.id), isFalse(businessLocations.deleted)),
+          and(eq(whatsapp.businessLocationId, businessLocations.id), isFalse(businessLocations.deleted)),
         )
         .where(and(eq(whatsapp.id, whatsappId), isFalse(whatsapp.deleted)))
         .execute()
@@ -109,7 +109,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .from(whatsapp)
       .innerJoin(
         businessLocations,
-        and(eq(businessLocations.id, whatsapp.businessesLocationId), isFalse(businessLocations.deleted)),
+        and(eq(businessLocations.id, whatsapp.businessLocationId), isFalse(businessLocations.deleted)),
       )
       .innerJoin(
         businessPlan,
@@ -149,7 +149,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
         businessHours: businessLocations.schedule,
       })
       .from(businessLocations)
-      .innerJoin(whatsapp, eq(whatsapp.businessesLocationId, businessLocations.id))
+      .innerJoin(whatsapp, eq(whatsapp.businessLocationId, businessLocations.id))
       .where(eq(whatsapp.id, whatsappId))
       .execute()
   }

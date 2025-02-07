@@ -34,6 +34,8 @@ export class CreateBusinessUseCase {
 
     await this.repository.addNetwork(businessId, Networks.WhatsApp)
 
-    return { businessId, locationId };
+    const whatsapp = await this.repository.addWhatsapp(locationId, data.phoneNumber)
+
+    return { businessId, locationId, whatsapp };
   }
 }
