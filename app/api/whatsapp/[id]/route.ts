@@ -8,17 +8,6 @@ import {MessageWebhookSchema} from "@/lib/whatsapp/models/webhook/MessageWebhook
  * This HTTP Method for endpoint is development only, it will be removed before release.
  */
 export async function GET(request: Request, {params}: { params: Promise<{ id: string }> }) {
-  const whatsappId = (await params).id
-
-  // await controller.saveResponses(whatsappId, [
-  //   "Dirección: 789 Lexington Avenue, New York, NY 10065",
-  //   "Horario: 8:00 AM - 8:00 PM",
-  //   "Teléfono: 1234567890",
-  //   "Correo: info@oscorpindustries.com",
-  // ])
-
-  const controller = new WhatsappApiRouteController(WhatsappRouteComposition.provideInstance())
-
   return NextResponse.json(
     {message: "received"},
     {status: HttpResponseCode.AlreadyReported},
@@ -39,8 +28,6 @@ export async function POST(request: Request, {params}: { params: { id: string } 
   const webhookSchema: MessageWebhookSchema = await request.json()
 
   const controller = new WhatsappApiRouteController(WhatsappRouteComposition.provideInstance())
-
-  console.log('received', JSON.stringify(webhookSchema, null, 2))
 
   const {body, init} = await controller.processMessage(whatsappId, webhookSchema.data)
 
