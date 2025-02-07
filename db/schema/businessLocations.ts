@@ -11,6 +11,7 @@ export const businessLocations = pgTable('business_locations', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: text('name').notNull(),
   businessId: uuid('business_id').notNull().references(() => businesses.id),
+  address: text('address').notNull(),
   isGlobal: boolean('is_global').notNull(),
   schedule: jsonb('schedule').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),

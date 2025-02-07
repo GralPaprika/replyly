@@ -1,0 +1,1 @@
+ALTER TABLE "business_locations" ADD COLUMN "address" text NOT NULL;
