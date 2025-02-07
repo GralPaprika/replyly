@@ -1,14 +1,14 @@
 import {NextResponse} from "next/server";
-import {BusinessSchema} from "@/lib/business/models/BusinessSchema";
+import {CreateBusinessRequest} from "@/lib/business/models/CreateBusinessRequest";
 import {BusinessApiRouteController} from "@/lib/business/controllers/BusinessApiRouteController";
 import {BusinessRouteComposition} from "@/composition/BusinessRouteComposition";
 
 export async function POST(request: Request) {
-  const data: BusinessSchema = await request.json()
+  const data: CreateBusinessRequest = await request.json()
 
   const controller = new BusinessApiRouteController(BusinessRouteComposition.provideInstance())
 
-  const businessId = await controller.createBusiness(data)
+  const business = await controller.createBusiness(data)
 
-  return NextResponse.json({businessId}, {status: 200})
+  return NextResponse.json(business, {status: 200})
 }

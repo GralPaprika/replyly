@@ -1,4 +1,4 @@
-export interface BusinessSchema {
+export interface CreateBusinessRequest {
   businessName: string;
   email: string;
   phoneNumber: string,
