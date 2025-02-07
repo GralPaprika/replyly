@@ -115,10 +115,13 @@ export class WhatsappApiRouteController {
   ): Promise<RouteResponse> {
     await this.updateConversationStatus(conversationId, ConversationStatus.MessageReceived)
 
+    // TODO: Validate message format, if message null throw exception
+    const message = data.messages.message.ephemeralMessage?.message?.extendedTextMessage?.text ?? // Windows
+      data.messages?.message.extendedTextMessage?.text // Android
     const response = await this.getBestResponse({
-      id: whatsappId,
-      whatsappId: '',
-      message: data.messages.message.ephemeralMessage?.message?.extendedTextMessage?.text,
+      whatsappBusinessLocationId: whatsappId,
+      chatId: conversationId,
+      message: message,
     })
 
     console.log(await this.sendResponseMessage(whatsappId, data, response))
@@ -175,7 +178,8 @@ export class WhatsappApiRouteController {
     content: string,
   ): Promise<SendMessageResponseSchema> {
     const recipientId = data.messages.key.remoteJid
-    const expiration = data.messages.message.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.expiration
+    const expiration = data.messages?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.expiration // Windows
+      ?? (data.messages?.message?.extendedTextMessage?.contextInfo?.ephemeralSettingTimestamp as number|undefined) // Android
     return await this.composition.provideSendMessageToClientUseCase().execute(whatsappId, recipientId, content, expiration)
   }
 
