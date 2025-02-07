@@ -12,8 +12,7 @@ export class GetBestResponseUseCase {
       body: JSON.stringify(requestData)
     });
 
-    const data: BotWebhookResponse = await response.json()
-
-    return data.message
+    // TODO: Format json response
+    return await response.text()
   }
 }

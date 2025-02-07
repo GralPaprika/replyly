@@ -117,7 +117,8 @@ export class WhatsappApiRouteController {
 
     // TODO: Validate message format, if message null throw exception
     const message = data.messages.message.ephemeralMessage?.message?.extendedTextMessage?.text ?? // Windows
-      data.messages?.message.extendedTextMessage?.text // Android
+      data.messages?.message?.extendedTextMessage?.text ?? // Android
+      data.messages?.message?.conversation // Android message doesn't disappear.
     const response = await this.getBestResponse({
       whatsappBusinessLocationId: whatsappId,
       chatId: conversationId,
