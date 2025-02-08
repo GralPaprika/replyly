@@ -14,6 +14,7 @@ import {ScheduleBotResetUseCase} from "@/lib/whatsapp/useCases/ScheduleBotResetU
 import {SchedulerRepository} from "@/lib/scheduler/SchedulerRepository";
 import {SchedulerRepositoryImpl} from "@/lib/scheduler/SchedulerRepositoryImpl";
 import {GetBestResponseUseCase} from "@/lib/whatsapp/useCases/GetBestResponseUseCase";
+import PQueue from "p-queue";
 
 export class WhatsappRouteComposition {
   private readonly appCompositionRoot: AppComposition
@@ -36,6 +37,10 @@ export class WhatsappRouteComposition {
 
   static provideInstance(): WhatsappRouteComposition {
     return new WhatsappRouteComposition(AppComposition.getInstance())
+  }
+
+  getQueue(): PQueue {
+    return this.appCompositionRoot.getQueue()
   }
 
   private provideWhatsappRepository(): WhatsappRepository {

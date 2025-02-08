@@ -25,71 +25,77 @@ export class WhatsappApiRouteController {
     data: WebHookData
   ): Promise<RouteResponse> {
     try {
-      const conversationId = await this.getConversationId(whatsappId, this.getChatId(data))
+      return await this.composition.getQueue().add(async () => {
+        console.log(`Added to queue ${whatsappId}`)
+        const conversationId = await this.getConversationId(whatsappId, this.getChatId(data))
+        console.log(`Conversation ID: ${conversationId} - Whatsapp ID: ${whatsappId}`)
 
-      if (this.isFromGroup(data)) {
-        return {
-          body: {message: ResponseMessage.GroupMessage},
-          init: {status: HttpResponseCode.Ok},
-        }
-      }
 
-      const source = await this.getMessageSource(data)
-
-      if (source === MessageSource.Bot)
-        return {
-          body: {message: ResponseMessage.AlreadyDispatched},
-          init: {status: HttpResponseCode.AlreadyReported},
+        if (this.isFromGroup(data)) {
+          return {
+            body: {message: ResponseMessage.GroupMessage},
+            init: {status: HttpResponseCode.Ok},
+          }
         }
 
-      if (source === MessageSource.BusinessUser) {
-        await this.updateConversationStatus(conversationId, ConversationStatus.UserTookControl)
-        return {
-          body: {message: ResponseMessage.UserInChat},
-          init: {status: HttpResponseCode.Ok},
-        }
-      }
+        const source = await this.getMessageSource(data)
 
-      if (!await this.hasActivePlan(whatsappId)) {
+        if (source === MessageSource.Bot)
+          return {
+            body: {message: ResponseMessage.AlreadyDispatched},
+            init: {status: HttpResponseCode.AlreadyReported},
+          }
+
+        if (source === MessageSource.BusinessUser) {
+          await this.updateConversationStatus(conversationId, ConversationStatus.UserTookControl)
+          return {
+            body: {message: ResponseMessage.UserInChat},
+            init: {status: HttpResponseCode.Ok},
+          }
+        }
+
+        if (!await this.hasActivePlan(whatsappId)) {
+          return {
+            body: {message: ResponseMessage.UnknownError},
+            init: {status: HttpResponseCode.ServerError},
+          }
+        }
+
+        const sender = data.messages.key.remoteJid
+        if (await this.checkIfSenderIsBlackListed(whatsappId, sender)) {
+          return {
+            body: {message: ResponseMessage.Responded},
+            init: {status: HttpResponseCode.Ok},
+          }
+        }
+
+        const conversationStatus = await this.getConversationStatus(conversationId)
+
+        if (
+          conversationStatus == ConversationStatus.Idle ||
+          conversationStatus == ConversationStatus.MessageReceived ||
+          conversationStatus == ConversationStatus.BotResponded
+        ) {
+          console.log(`Dispatching message for ${conversationId}`)
+          return this.handleCreateResponse(
+            whatsappId,
+            conversationId,
+            data as WebHookData,
+          )
+        }
+
+        if (conversationStatus == ConversationStatus.UserTookControl) {
+          return {
+            body: {message: ResponseMessage.Responded},
+            init: {status: HttpResponseCode.Ok},
+          }
+        }
+
         return {
           body: {message: ResponseMessage.UnknownError},
           init: {status: HttpResponseCode.ServerError},
         }
-      }
-
-      const sender = data.messages.key.remoteJid
-      if (await this.checkIfSenderIsBlackListed(whatsappId, sender)) {
-        return {
-          body: {message: ResponseMessage.Responded},
-          init: {status: HttpResponseCode.Ok},
-        }
-      }
-
-      const conversationStatus = await this.getConversationStatus(conversationId)
-
-      if (
-        conversationStatus == ConversationStatus.Idle ||
-        conversationStatus == ConversationStatus.MessageReceived ||
-        conversationStatus == ConversationStatus.BotResponded
-      ){
-        return this.handleCreateResponse(
-          whatsappId,
-          conversationId,
-          data as WebHookData,
-        )
-      }
-
-      if (conversationStatus == ConversationStatus.UserTookControl) {
-        return {
-          body: {message: ResponseMessage.Responded},
-          init: {status: HttpResponseCode.Ok},
-        }
-      }
-
-      return {
-        body: {message: ResponseMessage.UnknownError},
-        init: {status: HttpResponseCode.ServerError},
-      }
+      }) as RouteResponse
     } catch (exception) {
       if (exception instanceof HasActivePlanException) {
         const httpCode = exception.code !== HasActivePlanException.ErrorCode.SystemError ?

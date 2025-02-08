@@ -1,9 +1,11 @@
 import {drizzle, PostgresJsDatabase} from "drizzle-orm/postgres-js"
 import postgres from "postgres"
+import PQueue from "p-queue";
 
 export class AppComposition {
   private static instance: AppComposition
   private database!: PostgresJsDatabase
+  private queue!: PQueue
 
   private constructor() {}
 
@@ -19,5 +21,9 @@ export class AppComposition {
       this.database = drizzle(client)
     }
     return this.database
+  }
+
+  getQueue(): PQueue {
+    return this.queue ??= new PQueue({ concurrency: 1 })
   }
 }
