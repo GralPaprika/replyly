@@ -14,6 +14,7 @@ import {ScheduleBotResetUseCase} from "@/lib/whatsapp/useCases/ScheduleBotResetU
 import {SchedulerRepository} from "@/lib/scheduler/SchedulerRepository";
 import {SchedulerRepositoryImpl} from "@/lib/scheduler/SchedulerRepositoryImpl";
 import {GetBestResponseUseCase} from "@/lib/whatsapp/useCases/GetBestResponseUseCase";
+import {GetBestResponseForAudioUseCase} from "@/lib/whatsapp/useCases/GetBestResponseForAudioUseCase";
 
 export class WhatsappRouteComposition {
   private readonly appCompositionRoot: AppComposition
@@ -28,6 +29,7 @@ export class WhatsappRouteComposition {
   private isNumberBlackListedUseCase!: IsNumberBlackListedUseCase
   private scheduleBotResetUseCase!: ScheduleBotResetUseCase
   private getBestResponseUseCase!: GetBestResponseUseCase
+  private getBestResponseForAudioUseCase!: GetBestResponseForAudioUseCase
 
   constructor(appCompositionRoot: AppComposition) {
     this.appCompositionRoot = appCompositionRoot
@@ -94,5 +96,9 @@ export class WhatsappRouteComposition {
 
   provideGetBestResponseUseCase() {
     return this.getBestResponseUseCase ??= new GetBestResponseUseCase()
+  }
+
+  provideGetBestResponseForAudioUseCase() {
+    return this.getBestResponseForAudioUseCase ??= new GetBestResponseForAudioUseCase()
   }
 }

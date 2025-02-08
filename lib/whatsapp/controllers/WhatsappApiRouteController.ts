@@ -1,7 +1,7 @@
 import {ConversationStatus} from "@/lib/common/models/ConversationStatus";
 import {WhatsappRouteComposition} from "@/composition/WhatsappRouteComposition";
 import {MessageSource} from "@/lib/common/models/MessageSource";
-import {Data as WebHookData} from "@/lib/whatsapp/models/webhook/MessageWebhookSchema";
+import {AudioMessage, Data as WebHookData} from "@/lib/whatsapp/models/webhook/MessageWebhookSchema";
 import {SendMessageResponseSchema} from "@/lib/whatsapp/models/message/SendMessageResponseSchema";
 import {RouteResponse} from "@/lib/whatsapp/models/RouteResponse";
 import {HttpResponseCode} from "@/lib/common/models/HttpResponseCode";
@@ -15,6 +15,7 @@ enum ResponseMessage {
   UnknownError = 'Unknown error',
   Responded = 'Responded',
   GroupMessage = 'Group message ignored',
+  InvalidMessage = 'Invalid message',
 }
 
 export class WhatsappApiRouteController {
@@ -120,11 +121,28 @@ export class WhatsappApiRouteController {
     const message = data.messages.message.ephemeralMessage?.message?.extendedTextMessage?.text ?? // Windows
       data.messages?.message?.extendedTextMessage?.text ?? // Android
       data.messages?.message?.conversation // Android message doesn't disappear.
-    const response = await this.getBestResponse({
-      whatsappBusinessLocationId: whatsappId,
-      chatId: conversationId,
-      message: message,
-    })
+
+    const audioMessage = data.messages?.message.audioMessage
+
+    let response: string
+
+    if (message) {
+      console.log(`Message received: ${message}`)
+      response = await this.getBestResponse({
+        whatsappBusinessLocationId: whatsappId,
+        chatId: conversationId,
+        message: message,
+      })
+    } else if (audioMessage) {
+      console.log(`Audio message received: ${audioMessage.url}`)
+      response = await this.getBestResponseForAudio(audioMessage)
+    } else  {
+      console.log(`Invalid message received`)
+      return {
+        body: {message: ResponseMessage.InvalidMessage},
+        init: {status: HttpResponseCode.Accepted},
+      }
+    }
 
     if (response !== WAIT_FOR_RESPONSE) {
       console.log(await this.sendResponseMessage(whatsappId, data, response))
@@ -201,6 +219,10 @@ export class WhatsappApiRouteController {
 
   private async getBestResponse(requestData: BotWebhookRequest): Promise<string> {
     return await this.composition.provideGetBestResponseUseCase().execute(requestData)
+  }
+
+  private async getBestResponseForAudio(audioMessage: AudioMessage): Promise<string> {
+    return await this.composition.provideGetBestResponseForAudioUseCase().execute(audioMessage)
   }
 
   private isFromGroup(data: WebHookData): boolean  {

@@ -80,6 +80,20 @@ export interface ReactionMessage {
   senderTimestampMs: string;
 }
 
+export interface AudioMessage {
+  url: string;
+  mimetype: string;
+  fileSha256: string;
+  fileLength: string;
+  seconds: number;
+  ptt: boolean;
+  mediaKey: string;
+  fileEncSha256: string;
+  directPath: string;
+  mediaKeyTimestamp: string;
+  waveform: string;
+}
+
 export interface MessageContent {
   conversation?: string;
   protocolMessage?: ProtocolMessage;
@@ -89,6 +103,7 @@ export interface MessageContent {
   stickerMessage?: StickerMessage;
   senderKeyDistributionMessage?: SenderKeyDistributionMessage;
   reactionMessage?: ReactionMessage;
+  audioMessage?: AudioMessage;
 }
 
 export interface Key {
