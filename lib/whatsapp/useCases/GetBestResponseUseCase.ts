@@ -1,5 +1,4 @@
 import {HttpMethod} from "@/lib/common/models/HttpMethod";
-import {BotWebhookResponse} from "@/lib/whatsapp/models/botservice/BotWebhookResponse";
 import {BotWebhookRequest} from "@/lib/whatsapp/models/botservice/BotWebhookRequest";
 
 export class GetBestResponseUseCase {

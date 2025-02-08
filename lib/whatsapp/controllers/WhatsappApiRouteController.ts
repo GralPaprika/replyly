@@ -7,6 +7,7 @@ import {RouteResponse} from "@/lib/whatsapp/models/RouteResponse";
 import {HttpResponseCode} from "@/lib/common/models/HttpResponseCode";
 import {HasActivePlanException} from "@/lib/whatsapp/useCases/HasActivePlanUseCase";
 import {BotWebhookRequest} from "@/lib/whatsapp/models/botservice/BotWebhookRequest";
+import {WAIT_FOR_RESPONSE} from "@/lib/whatsapp/models/const";
 
 enum ResponseMessage {
   AlreadyDispatched = 'Already dispatched',
@@ -125,7 +126,11 @@ export class WhatsappApiRouteController {
       message: message,
     })
 
-    console.log(await this.sendResponseMessage(whatsappId, data, response))
+    if (response !== WAIT_FOR_RESPONSE) {
+      console.log(await this.sendResponseMessage(whatsappId, data, response))
+    } else {
+      console.log(`Waiting for response for conversation ${conversationId}`)
+    }
 
     await this.updateConversationStatus(conversationId, ConversationStatus.BotResponded)
 
