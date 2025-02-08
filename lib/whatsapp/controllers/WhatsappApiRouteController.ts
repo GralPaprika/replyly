@@ -180,7 +180,7 @@ export class WhatsappApiRouteController {
     const syncUpdate = data.messages.message.protocolMessage?.type === 'EPHEMERAL_SYNC_RESPONSE'
 
     if (!fromMe && !syncUpdate) return MessageSource.Client
-    if (fromServer || syncUpdate) return MessageSource.Bot
+    if (fromMe && (fromServer || syncUpdate)) return MessageSource.Bot
     console.log(`fromMe: ${fromMe}, fromServer: ${fromServer}, syncUpdate: ${syncUpdate}`)
     return MessageSource.BusinessUser
   }
