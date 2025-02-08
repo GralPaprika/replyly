@@ -163,6 +163,7 @@ export class WhatsappApiRouteController {
 
     if (!fromMe && !syncUpdate) return MessageSource.Client
     if (fromServer || syncUpdate) return MessageSource.Bot
+    console.log(`fromMe: ${fromMe}, fromServer: ${fromServer}, syncUpdate: ${syncUpdate}`)
     return MessageSource.BusinessUser
   }
 

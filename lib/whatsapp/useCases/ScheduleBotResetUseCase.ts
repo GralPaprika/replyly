@@ -1,7 +1,7 @@
-import {WhatsappRepository} from "@/lib/whatsapp/models/WhatsappRepository";
 import {UpdateConversationStatusUseCase} from "@/lib/whatsapp/useCases/UpdateConversationStatusUseCase";
 import {ConversationStatus} from "@/lib/common/models/ConversationStatus";
-import {SchedulerRepository, ScheduleTime} from "@/lib/scheduler/SchedulerRepository";
+import {SchedulerRepository} from "@/lib/scheduler/SchedulerRepository";
+import {RESET_CONVERSATION_TIME_MINUTES} from "@/lib/scheduler/const";
 
 export class ScheduleBotResetUseCase {
   constructor(
@@ -10,9 +10,10 @@ export class ScheduleBotResetUseCase {
   ) {}
 
   execute(conversationId: string): void {
-    this.scheduleRepository.scheduleTask(conversationId, { minutes: 30 }, async () => {
-      console.log('Resetting conversation', conversationId);
-      await this.updateConversationStatusUseCase.execute(conversationId, ConversationStatus.Idle);
+    this.scheduleRepository.scheduleTask(conversationId, { minutes: RESET_CONVERSATION_TIME_MINUTES }, () => {
+      this.updateConversationStatusUseCase.execute(conversationId, ConversationStatus.Idle)
+        .then(() => { console.log('Conversation reset', conversationId) })
+        .catch((error) => { console.error('Error resetting conversation', error) });
     });
   }
 }

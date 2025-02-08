@@ -5,18 +5,11 @@ export class SchedulerRepositoryImpl implements SchedulerRepository {
   private tasks = new Map<string, Job>();
 
   scheduleTask(id: string, time: ScheduleTime, task: () => void) {
-    const newJob = scheduleJob(this.timeToString(time), task);
+    const newJob = scheduleJob(id, { minute: time.minutes }, task);
     const job = this.tasks.get(id);
     if (job) {
       job.cancel();
     }
     this.tasks.set(id, newJob);
-  }
-
-  private timeToString(time: ScheduleTime): string {
-    console.log(time);
-    const string = `${time.seconds ?? '*'} ${time.minutes ?? '*'} ${time.hours ?? '*'} ${time.dayOfMonth ?? '*'} ${time.month ?? '*'} ${time.dayOfWeek ?? ''}`;
-    console.log(string);
-    return string;
   }
 }

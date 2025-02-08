@@ -18,7 +18,6 @@ import {GetBestResponseUseCase} from "@/lib/whatsapp/useCases/GetBestResponseUse
 export class WhatsappRouteComposition {
   private readonly appCompositionRoot: AppComposition
   private whatsappRepository!: WhatsappRepository
-  private schedulerRepository!: SchedulerRepository
   private hasActivePlanUseCase!: HasActivePlanUseCase
   private getConversationStatusUseCase!: GetConversationStatusUseCase
   private updateConversationStatusUseCase!: UpdateConversationStatusUseCase
@@ -43,7 +42,7 @@ export class WhatsappRouteComposition {
   }
 
   private provideSchedulerRepository(): SchedulerRepository {
-    return this.schedulerRepository ??= new SchedulerRepositoryImpl()
+    return this.appCompositionRoot.provideSchedulerRepository()
   }
 
   private provideDeactivatePlanUseCase(): DeactivatePlanUseCase {
