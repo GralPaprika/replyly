@@ -8,7 +8,7 @@ import {CreateBusinessResponse} from "@/lib/business/models/CreateBusinessRespon
 export class CreateBusinessUseCase {
   constructor(private readonly repository: BusinessRepository) {}
 
-  async createBusiness(data: CreateBusinessRequest): Promise<CreateBusinessResponse> {
+  async execute(data: CreateBusinessRequest): Promise<CreateBusinessResponse> {
     const businessId = await this.repository.createBusiness(data);
 
     await this.repository.addPlan(businessId, Plans.Demo);

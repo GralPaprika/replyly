@@ -15,6 +15,7 @@ import {SchedulerRepository} from "@/lib/scheduler/SchedulerRepository";
 import {SchedulerRepositoryImpl} from "@/lib/scheduler/SchedulerRepositoryImpl";
 import {GetBestResponseUseCase} from "@/lib/whatsapp/useCases/GetBestResponseUseCase";
 import {GetBestResponseForAudioUseCase} from "@/lib/whatsapp/useCases/GetBestResponseForAudioUseCase";
+import {GetClientIdUseCase} from "@/lib/whatsapp/useCases/GetClientIdUseCase";
 
 export class WhatsappRouteComposition {
   private readonly appCompositionRoot: AppComposition
@@ -30,6 +31,7 @@ export class WhatsappRouteComposition {
   private scheduleBotResetUseCase!: ScheduleBotResetUseCase
   private getBestResponseUseCase!: GetBestResponseUseCase
   private getBestResponseForAudioUseCase!: GetBestResponseForAudioUseCase
+  private getClientIdUseCase!: GetClientIdUseCase
 
   constructor(appCompositionRoot: AppComposition) {
     this.appCompositionRoot = appCompositionRoot
@@ -100,5 +102,9 @@ export class WhatsappRouteComposition {
 
   provideGetBestResponseForAudioUseCase() {
     return this.getBestResponseForAudioUseCase ??= new GetBestResponseForAudioUseCase()
+  }
+
+  provideGetClientIdUseCase() {
+    return this.getClientIdUseCase ??= new GetClientIdUseCase(this.provideWhatsappRepository())
   }
 }

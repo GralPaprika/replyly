@@ -9,6 +9,7 @@ import {ConversationStatus} from "@/lib/common/models/ConversationStatus";
 import {RepositoryException, WhatsappRepository} from "@/lib/whatsapp/models/WhatsappRepository";
 import {whatsappConversation} from "@/db/schema/whatsappConversation";
 import {whatsappContacts} from "@/db/schema/whatsappContacts";
+import {clients} from "@/db/schema/clients";
 
 enum ErrorMessage {
   ConversationStatusNotFound = 'Conversation status not found',
@@ -125,7 +126,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .execute()
   }
 
-  async getConversationId(whatsappId: string, chatId: string): Promise<string | null> {
+  async getConversationId(whatsappId: string, clientId: string): Promise<string | null> {
     const result = await this.db
         .select({
           conversationId: whatsappConversation.id,
@@ -134,7 +135,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
         .where(
           and(
             eq(whatsappConversation.whatsappId, whatsappId),
-            eq(whatsappConversation.chatId, chatId),
+            eq(whatsappConversation.clientId, clientId),
             isFalse(whatsappConversation.deleted),
           ),
         )
@@ -167,15 +168,43 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
     return result.length > 0
   }
 
-  async createConversation(whatsappId: string, chatId: string): Promise<string> {
+  async createConversation(whatsappId: string, clientId: string): Promise<string> {
     const result = await this.db
       .insert(whatsappConversation)
       .values({
         whatsappId,
-        chatId,
+        clientId,
         conversationStatus: ConversationStatus.MessageReceived,
       })
       .returning({ id: whatsappConversation.id })
+
+    return result[0].id
+  }
+
+  async getClientId(whatsappChatId: string): Promise<string|null> {
+    const result = await this.db
+      .select({
+        clientId: clients.id,
+      })
+      .from(clients)
+      .where(
+        and(
+          eq(clients.whatsappId, whatsappChatId),
+          isFalse(clients.deleted),
+        ),
+      )
+      .execute()
+
+    return result.length > 0 ? result[0].clientId : null
+  }
+
+  async createClient(whatsappChatId: string): Promise<string> {
+    const result = await this.db
+      .insert(clients)
+      .values({
+        whatsappId: whatsappChatId,
+      })
+      .returning({ id: clients.id })
 
     return result[0].id
   }

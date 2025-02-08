@@ -8,6 +8,6 @@ export class BusinessApiRouteController {
   async createBusiness(
     data: CreateBusinessRequest
   ): Promise<CreateBusinessResponse> {
-    return await this.composition.provideCreateBusinessUseCase().createBusiness(data);
+    return await this.composition.provideCreateBusinessUseCase().execute(data);
   }
 }

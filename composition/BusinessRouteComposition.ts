@@ -1,7 +1,7 @@
 import {AppComposition} from "@/composition/AppComposition";
 import {BusinessRepository} from "@/lib/business/models/BusinessRepository";
 import {BusinessRepositoryImpl} from "@/lib/business/repositories/BusinessRepositoryImpl";
-import {CreateBusinessUseCase} from "@/lib/usecases/CreateBusinessUseCase";
+import {CreateBusinessUseCase} from "@/lib/business/usecases/CreateBusinessUseCase";
 
 export class BusinessRouteComposition {
   private readonly appCompositionRoot: AppComposition

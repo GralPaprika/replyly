@@ -64,4 +64,8 @@ export interface WhatsappRepository {
   isNumberBlackListed(whatsappId:string, contactId: string): Promise<boolean>
 
   createConversation(whatsappId: string, chatId: string): Promise<string>;
+
+  getClientId(whatsappChatId: string): Promise<string|null>;
+
+  createClient(whatsappChatId: string): Promise<string>;
 }

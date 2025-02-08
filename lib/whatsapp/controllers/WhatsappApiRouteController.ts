@@ -26,7 +26,8 @@ export class WhatsappApiRouteController {
     data: WebHookData
   ): Promise<RouteResponse> {
     try {
-      const conversationId = await this.getConversationId(whatsappId, this.getChatId(data))
+      const clientId = await this.getClientId(this.getWhatsappChatId(data))
+      const conversationId = await this.getConversationId(whatsappId, clientId)
 
       if (this.isFromGroup(data)) {
         return {
@@ -76,6 +77,7 @@ export class WhatsappApiRouteController {
         return this.handleCreateResponse(
           whatsappId,
           conversationId,
+          clientId,
           data as WebHookData,
         )
       }
@@ -113,6 +115,7 @@ export class WhatsappApiRouteController {
   private async handleCreateResponse(
     whatsappId: string,
     conversationId: string,
+    clientId: string,
     data: WebHookData,
   ): Promise<RouteResponse> {
     await this.updateConversationStatus(conversationId, ConversationStatus.MessageReceived)
@@ -122,21 +125,16 @@ export class WhatsappApiRouteController {
       data.messages?.message?.extendedTextMessage?.text ?? // Android
       data.messages?.message?.conversation // Android message doesn't disappear.
 
-    const audioMessage = data.messages?.message.audioMessage
-
     let response: string
 
     if (message) {
       console.log(`Message received: ${message}`)
       response = await this.getBestResponse({
         whatsappBusinessLocationId: whatsappId,
-        chatId: conversationId,
+        chatId: clientId,
         message: message,
       })
-    } else if (audioMessage) {
-      console.log(`Audio message received: ${audioMessage.url}`)
-      response = await this.getBestResponseForAudio(audioMessage)
-    } else  {
+    } else {
       console.log(`Invalid message received`)
       return {
         body: {message: ResponseMessage.InvalidMessage},
@@ -162,8 +160,12 @@ export class WhatsappApiRouteController {
     }
   }
 
-  private getChatId(schema: WebHookData): string {
+  private getWhatsappChatId(schema: WebHookData): string {
     return schema.messages.key.remoteJid
+  }
+
+  private async getClientId(whatsappChatId: string): Promise<string> {
+    return await this.composition.provideGetClientIdUseCase().execute(whatsappChatId)
   }
 
   private async getConversationId(whatsappId: string, chatId: string): Promise<string> {
