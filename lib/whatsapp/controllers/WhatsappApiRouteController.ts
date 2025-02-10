@@ -125,6 +125,8 @@ export class WhatsappApiRouteController {
       data.messages?.message?.extendedTextMessage?.text ?? // Android
       data.messages?.message?.conversation // Android message doesn't disappear.
 
+    const audioMessage = data.messages?.message.audioMessage
+
     let response: string
 
     if (message) {
@@ -134,6 +136,9 @@ export class WhatsappApiRouteController {
         chatId: clientId,
         message: message,
       })
+    } else if (audioMessage) {
+      console.log(`Audio message received: ${audioMessage.url}`)
+      response = await this.getBestResponseForAudio(audioMessage)
     } else {
       console.log(`Invalid message received`)
       return {
