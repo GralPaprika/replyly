@@ -77,7 +77,7 @@ function getFolderName(type: MessageType): string {
 function HKDF(key: Buffer, length: number, appInfo: Buffer = Buffer.alloc(0)): Buffer {
   const prk = crypto.createHmac(HKDF_ALGORITHM, Buffer.alloc(32)).update(key).digest();
   let keyStream = Buffer.alloc(0);
-  let keyBlock = Buffer.alloc(0);
+  let keyBlock: Buffer = Buffer.alloc(0);
   let blockIndex = 1;
   while (keyStream.length < length) {
     keyBlock = crypto.createHmac(HKDF_ALGORITHM, prk).update(Buffer.concat([keyBlock, appInfo, Buffer.from([blockIndex])])).digest();
