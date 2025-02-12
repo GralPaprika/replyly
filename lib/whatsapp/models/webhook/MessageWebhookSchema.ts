@@ -1,7 +1,7 @@
 export interface DisappearingMode {
   initiator?: string;
   trigger?: string;
-  initiatedByMe: boolean;
+  initiatedByMe?: boolean;
 }
 
 export interface ContextInfo {
@@ -90,6 +90,8 @@ export interface AudioMessage {
   mediaKey: string;
   fileEncSha256: string;
   directPath: string;
+  contextInfo?: ContextInfo;
+  streamingSidecar?: string;
   mediaKeyTimestamp: string;
   waveform: string;
 }

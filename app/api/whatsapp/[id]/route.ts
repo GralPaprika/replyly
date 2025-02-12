@@ -1,18 +1,7 @@
 import {NextResponse} from "next/server";
-import {HttpResponseCode} from "@/lib/common/models/HttpResponseCode";
 import {WhatsappRouteComposition} from "@/composition/WhatsappRouteComposition";
 import {WhatsappApiRouteController} from "@/lib/whatsapp/controllers/WhatsappApiRouteController";
 import {MessageWebhookSchema} from "@/lib/whatsapp/models/webhook/MessageWebhookSchema";
-
-/**
- * This HTTP Method for endpoint is development only, it will be removed before release.
- */
-export async function GET(request: Request, {params}: { params: Promise<{ id: string }> }) {
-  return NextResponse.json(
-    {message: "received"},
-    {status: HttpResponseCode.AlreadyReported},
-  )
-}
 
 /**
  * This method captures messages received and sent from a whatsapp number.
