@@ -16,6 +16,8 @@ import {SchedulerRepositoryImpl} from "@/lib/scheduler/SchedulerRepositoryImpl";
 import {GetBestResponseUseCase} from "@/lib/whatsapp/useCases/GetBestResponseUseCase";
 import {GetBestResponseForAudioUseCase} from "@/lib/whatsapp/useCases/GetBestResponseForAudioUseCase";
 import {GetClientIdUseCase} from "@/lib/whatsapp/useCases/GetClientIdUseCase";
+import {DecodeMediaMessageUseCase} from "@/lib/whatsapp/useCases/DecodeMediaMessageUseCase";
+import {DeleteDecodedFileUseCase} from "@/lib/whatsapp/useCases/DeleteDecodedFileUseCase";
 
 export class WhatsappRouteComposition {
   private readonly appCompositionRoot: AppComposition
@@ -31,6 +33,8 @@ export class WhatsappRouteComposition {
   private scheduleBotResetUseCase!: ScheduleBotResetUseCase
   private getBestResponseUseCase!: GetBestResponseUseCase
   private getBestResponseForAudioUseCase!: GetBestResponseForAudioUseCase
+  private getDecodeMediaMessageUseCase!: DecodeMediaMessageUseCase
+  private getDeleteDecodedFileUseCase!: DeleteDecodedFileUseCase
   private getClientIdUseCase!: GetClientIdUseCase
 
   constructor(appCompositionRoot: AppComposition) {
@@ -100,8 +104,19 @@ export class WhatsappRouteComposition {
     return this.getBestResponseUseCase ??= new GetBestResponseUseCase()
   }
 
+  provideGetDecodeMediaMessageUseCase() {
+    return this.getDecodeMediaMessageUseCase ??= new DecodeMediaMessageUseCase()
+  }
+
+  provideGetDeleteDecodedFileUseCase() {
+    return this.getDeleteDecodedFileUseCase ??= new DeleteDecodedFileUseCase()
+  }
+
   provideGetBestResponseForAudioUseCase() {
-    return this.getBestResponseForAudioUseCase ??= new GetBestResponseForAudioUseCase()
+    return this.getBestResponseForAudioUseCase ??= new GetBestResponseForAudioUseCase(
+      this.provideGetDecodeMediaMessageUseCase(),
+      this.provideGetDeleteDecodedFileUseCase()
+    )
   }
 
   provideGetClientIdUseCase() {

@@ -125,7 +125,7 @@ export class WhatsappApiRouteController {
       data.messages?.message?.extendedTextMessage?.text ?? // Android
       data.messages?.message?.conversation // Android message doesn't disappear.
 
-    const audioMessage = data.messages?.message.audioMessage
+    const audioMessage = data.messages.message.audioMessage
 
     let response: string
 
@@ -138,7 +138,8 @@ export class WhatsappApiRouteController {
       })
     } else if (audioMessage) {
       console.log(`Audio message received: ${audioMessage.url}`)
-      response = await this.getBestResponseForAudio(audioMessage)
+      const messageId = data.messages.key.id
+      response = await this.getBestResponseForAudio(conversationId, messageId, audioMessage)
     } else {
       console.log(`Invalid message received`)
       return {
@@ -228,8 +229,8 @@ export class WhatsappApiRouteController {
     return await this.composition.provideGetBestResponseUseCase().execute(requestData)
   }
 
-  private async getBestResponseForAudio(audioMessage: AudioMessage): Promise<string> {
-    return await this.composition.provideGetBestResponseForAudioUseCase().execute(audioMessage)
+  private async getBestResponseForAudio(conversationId: string, messageId: string, audioMessage: AudioMessage): Promise<string> {
+    return await this.composition.provideGetBestResponseForAudioUseCase().execute(conversationId, messageId, audioMessage)
   }
 
   private isFromGroup(data: WebHookData): boolean  {
