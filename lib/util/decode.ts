@@ -3,6 +3,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as Path from 'path';
 import * as mime from 'mime-types';
+import {ROOT_DIR} from "@/lib/util/rootdir";
 
 export type MessageType = 'audioMessage'
 export type WhatsappTypeMessageToDecode = 'WhatsApp Audio Keys'
@@ -34,8 +35,7 @@ const AES_DECRYPT_ALGORITHM = 'aes-256-cbc';
 export async function downloadUsingEncLink(payload: Payload): Promise<string> {
   let filename = payload.filename || crypto.randomBytes(16).toString('hex');
   const folderName = getFolderName(payload.messageType);
-  const fullPath = `./${PUBLIC_DIR}${folderName}`;
-  const folderPath = `${PUBLIC_DIR}/${folderName}`;
+  const fullPath = Path.resolve(ROOT_DIR, `${PUBLIC_DIR}${folderName}`)
   const mediaKey = payload.mediaKey;
   const url = payload.url;
   const messageType = payload.messageType;
@@ -49,7 +49,7 @@ export async function downloadUsingEncLink(payload: Payload): Promise<string> {
   }
 
   const response = await axios.get(url, { responseType: 'arraybuffer' });
-  const encFilePath = Path.join(folderPath, `${filename}.${ENC_FILE_EXTENSION}`);
+  const encFilePath = Path.join(fullPath, `${filename}.${ENC_FILE_EXTENSION}`);
   fs.writeFileSync(encFilePath, response.data);
 
   const mediaKeyExpanded = HKDF(Buffer.from(mediaKey, 'base64'), 112, Buffer.from(whatsappTypeMessageToDecode, 'utf-8'));
@@ -57,7 +57,7 @@ export async function downloadUsingEncLink(payload: Payload): Promise<string> {
   const file = mediaData.slice(0, -10);
   const fileDataDecoded = AESDecrypt(mediaKeyExpanded.slice(16, 48), file, mediaKeyExpanded.slice(0, 16));
 
-  const decodedFilePath = Path.join(folderPath, completeFilename);
+  const decodedFilePath = Path.join(fullPath, completeFilename);
   fs.writeFileSync(decodedFilePath, fileDataDecoded);
 
   console.log(`Decrypted [${messageType}] [${completeFilename}]`);
