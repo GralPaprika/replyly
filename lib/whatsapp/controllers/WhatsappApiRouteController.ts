@@ -8,6 +8,8 @@ import {HttpResponseCode} from "@/lib/common/models/HttpResponseCode";
 import {HasActivePlanException} from "@/lib/whatsapp/useCases/HasActivePlanUseCase";
 import {BotWebhookRequest} from "@/lib/whatsapp/models/botservice/BotWebhookRequest";
 import {WAIT_FOR_RESPONSE} from "@/lib/whatsapp/models/const";
+import * as Path from "path";
+import * as fs from 'fs';
 
 enum ResponseMessage {
   AlreadyDispatched = 'Already dispatched',
@@ -188,7 +190,7 @@ export class WhatsappApiRouteController {
     const syncUpdate = data.messages.message.protocolMessage?.type === 'EPHEMERAL_SYNC_RESPONSE'
 
     if (!fromMe && !syncUpdate) return MessageSource.Client
-    if (fromMe && (fromServer || syncUpdate)) return MessageSource.Bot
+    if (fromMe && fromServer || syncUpdate) return MessageSource.Bot
     console.log(`fromMe: ${fromMe}, fromServer: ${fromServer}, syncUpdate: ${syncUpdate}`)
     return MessageSource.BusinessUser
   }
@@ -230,7 +232,18 @@ export class WhatsappApiRouteController {
   }
 
   private async getBestResponseForAudio(conversationId: string, messageId: string, audioMessage: AudioMessage): Promise<string> {
-    return await this.composition.provideGetBestResponseForAudioUseCase().execute(conversationId, messageId, audioMessage)
+    const destinationPath = Path.resolve(__dirname, '..', '..', '..', '..', 'public', 'whatsapp', 'audio')
+
+    if (!fs.existsSync(destinationPath)) {
+      fs.mkdirSync(destinationPath, {recursive: true})
+    }
+
+    return await this.composition.provideGetBestResponseForAudioUseCase().execute(
+      conversationId,
+      messageId,
+      audioMessage,
+      destinationPath,
+    )
   }
 
   private isFromGroup(data: WebHookData): boolean  {

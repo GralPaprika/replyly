@@ -10,7 +10,7 @@ export class GetBestResponseForAudioUseCase {
     private readonly deleteDecodedFileUseCase: DeleteDecodedFileUseCase,
   ) {}
 
-  async execute(conversationId: string, messageId: string, audioData: AudioMessage) {
+  async execute(conversationId: string, messageId: string, audioData: AudioMessage, destinationPath: string): Promise<string> {
     const audioFile = await this.decodeMediaMessageUseCase.execute({
       url: audioData.url,
       mediaKey: audioData.mediaKey,
@@ -18,7 +18,7 @@ export class GetBestResponseForAudioUseCase {
       messageType: AudioType.type,
       whatsappTypeMessageToDecode: AudioType.whatsappTypeMessageToDecode,
       filename: `${conversationId}-${messageId}`
-    });
+    }, destinationPath);
 
     const serverName = process.env.SERVER_URL || '';
 
@@ -27,8 +27,10 @@ export class GetBestResponseForAudioUseCase {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ url: `${serverName}/whatsapp/audio/${audioFile}` })
+      body: JSON.stringify({ url: `${serverName}/api/public/whatsapp/audio/${audioFile}` })
     });
+
+    console.log('URL', `${serverName}/api/public/whatsapp/audio/${audioFile}`)
 
     // this.deleteDecodedFileUseCase.execute(`./public/whatsapp/audio/${audioFile}`);
 

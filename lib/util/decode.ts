@@ -3,7 +3,6 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as Path from 'path';
 import * as mime from 'mime-types';
-import {ROOT_DIR} from "@/lib/util/rootdir";
 
 export type MessageType = 'audioMessage'
 export type WhatsappTypeMessageToDecode = 'WhatsApp Audio Keys'
@@ -27,15 +26,12 @@ export interface Payload {
   readonly filename?: string;
 }
 
-const PUBLIC_DIR = 'public/whatsapp/';
 const ENC_FILE_EXTENSION = 'enc';
 const HKDF_ALGORITHM = 'sha256';
 const AES_DECRYPT_ALGORITHM = 'aes-256-cbc';
 
-export async function downloadUsingEncLink(payload: Payload): Promise<string> {
+export async function downloadUsingEncLink(payload: Payload, destinationPath: string): Promise<string> {
   let filename = payload.filename || crypto.randomBytes(16).toString('hex');
-  const folderName = getFolderName(payload.messageType);
-  const fullPath = Path.resolve(ROOT_DIR, `${PUBLIC_DIR}${folderName}`)
   const mediaKey = payload.mediaKey;
   const url = payload.url;
   const messageType = payload.messageType;
@@ -44,12 +40,8 @@ export async function downloadUsingEncLink(payload: Payload): Promise<string> {
   const fileExtension = mime.extension(mimetype) || '';
   const completeFilename = `${filename}.${fileExtension}`;
 
-  if (!fs.existsSync(fullPath)) {
-    fs.mkdirSync(fullPath);
-  }
-
   const response = await axios.get(url, { responseType: 'arraybuffer' });
-  const encFilePath = Path.join(fullPath, `${filename}.${ENC_FILE_EXTENSION}`);
+  const encFilePath = Path.join(destinationPath, `${filename}.${ENC_FILE_EXTENSION}`);
   fs.writeFileSync(encFilePath, response.data);
 
   const mediaKeyExpanded = HKDF(Buffer.from(mediaKey, 'base64'), 112, Buffer.from(whatsappTypeMessageToDecode, 'utf-8'));
@@ -57,21 +49,10 @@ export async function downloadUsingEncLink(payload: Payload): Promise<string> {
   const file = mediaData.slice(0, -10);
   const fileDataDecoded = AESDecrypt(mediaKeyExpanded.slice(16, 48), file, mediaKeyExpanded.slice(0, 16));
 
-  const decodedFilePath = Path.join(fullPath, completeFilename);
+  const decodedFilePath = Path.join(destinationPath, completeFilename);
   fs.writeFileSync(decodedFilePath, fileDataDecoded);
 
-  console.log(`Decrypted [${messageType}] [${completeFilename}]`);
-
   return completeFilename;
-}
-
-function getFolderName(type: MessageType): string {
-  switch (type) {
-    case AudioType.type:
-      return 'audio';
-    default:
-      throw Error('Invalid type');
-  }
 }
 
 function HKDF(key: Buffer, length: number, appInfo: Buffer = Buffer.alloc(0)): Buffer {
