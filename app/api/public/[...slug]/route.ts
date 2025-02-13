@@ -5,6 +5,11 @@ import Path from "path";
 
 const publicFolder = Path.resolve(__dirname, '..', '..', '..', '..', 'public')
 
+enum ContentType {
+  Oga = 'audio/ogg',
+  All = '*/*',
+}
+
 export async function GET(req: Request, { params }: { params: { slug?: string[] } }) {
   try {
     const slug = params.slug || []  // ["images", "avatar", "1234567.jpg"]
@@ -16,10 +21,30 @@ export async function GET(req: Request, { params }: { params: { slug?: string[] 
 
     if (!fileContent) return new NextResponse('Not Found', { status: 404 })
 
-    return new NextResponse(fileContent)
+    const contentType = getContentTypes(getFileExtension(slug[slug.length - 1]))
+    return new NextResponse(fileContent, {
+      headers: {
+        'Accept': contentType,
+        'Content-Type': contentType,
+      },
+    })
 
   } catch (err) {
     console.error(' GET Avatar | err: ', err)
     return new NextResponse('Not Found', { status: 404 })
+  }
+}
+
+function getFileExtension(filename: string): string {
+  const parts = filename.split('.')
+  return parts[parts.length - 1]
+}
+
+function getContentTypes(type: string): string {
+  switch (type) {
+    case 'oga':
+      return ContentType.Oga
+    default:
+      return ContentType.All
   }
 }
