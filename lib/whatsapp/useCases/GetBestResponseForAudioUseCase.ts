@@ -27,7 +27,7 @@ export class GetBestResponseForAudioUseCase {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ url: `${serverName}/api/public/whatsapp/audio/${audioFile}` })
+      body: JSON.stringify({ voice: `${serverName}/api/public/whatsapp/audio/${audioFile}` })
     });
 
     console.log('URL', `${serverName}/api/public/whatsapp/audio/${audioFile}`)
