@@ -1,0 +1,1 @@
+ALTER TABLE "whatsapp_conversation" ADD COLUMN "scheduled_reset_id" uuid;

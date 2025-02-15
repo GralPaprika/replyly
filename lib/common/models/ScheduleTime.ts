@@ -6,8 +6,3 @@ export interface ScheduleTime {
   month?: number;
   dayOfWeek?: number;
 }
-
-
-export interface SchedulerRepository {
-  scheduleTask(id: string, time: ScheduleTime, task: () => void): void;
-}

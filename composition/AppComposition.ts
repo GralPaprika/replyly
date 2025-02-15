@@ -1,12 +1,9 @@
 import {drizzle, PostgresJsDatabase} from "drizzle-orm/postgres-js"
 import postgres from "postgres"
-import {SchedulerRepository} from "@/lib/scheduler/SchedulerRepository";
-import {SchedulerRepositoryImpl} from "@/lib/scheduler/SchedulerRepositoryImpl";
 
 export class AppComposition {
   private static instance: AppComposition
   private database!: PostgresJsDatabase
-  private schedulerRepository!: SchedulerRepository
 
   private constructor() {}
 
@@ -22,9 +19,5 @@ export class AppComposition {
       this.database = drizzle(client)
     }
     return this.database
-  }
-
-  provideSchedulerRepository(): SchedulerRepository {
-    return this.schedulerRepository ??= new SchedulerRepositoryImpl()
   }
 }

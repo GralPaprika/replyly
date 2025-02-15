@@ -1,6 +1,6 @@
 import {PostgresJsDatabase} from "drizzle-orm/postgres-js";
 import {whatsapp} from "@/db/schema/whatsapp";
-import {and, eq} from "drizzle-orm";
+import {and, eq, sql} from "drizzle-orm";
 import {businessLocations} from "@/db/schema/businessLocations";
 import {businessPlan} from "@/db/schema/businessPlan";
 import {isFalse, isTrue} from "@/lib/common/helpers/DatabaseFunctions";
@@ -10,6 +10,8 @@ import {RepositoryException, WhatsappRepository} from "@/lib/whatsapp/models/Wha
 import {whatsappConversation} from "@/db/schema/whatsappConversation";
 import {whatsappContacts} from "@/db/schema/whatsappContacts";
 import {clients} from "@/db/schema/clients";
+import DateFormatter from "date-and-time";
+import {ScheduleTime} from "@/lib/common/models/ScheduleTime";
 
 enum ErrorMessage {
   ConversationStatusNotFound = 'Conversation status not found',
@@ -207,5 +209,62 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .returning({ id: clients.id })
 
     return result[0].id
+  }
+
+  async scheduleBotReset(id: string, time: ScheduleTime) {
+    const resultJobId = await this.db
+      .select({scheduledResetId: whatsappConversation.scheduledResetId})
+      .from(whatsappConversation)
+      .where(and(
+        eq(whatsappConversation.id, id),
+        isFalse(whatsappConversation.deleted),
+      ))
+      .execute()
+
+    if (!resultJobId.length) {
+      return
+    }
+
+    if (resultJobId[0].scheduledResetId !== null) {
+      const result = await this.db.execute(sql.raw(`SELECT cron.unschedule('${resultJobId[0].scheduledResetId}')`))
+      if (!result || !result[0]['unschedule']) {
+        throw new Error('Error unscheduling task')
+      }
+    }
+
+    const result = await this.db.execute(sql.raw(this.getScheduleResetQuery(id, time)));
+
+    if (!result) {
+      throw new Error('Error scheduling task')
+    }
+
+    await this.db.update(whatsappConversation)
+      .set({scheduledResetId: id})
+      .where(eq(whatsappConversation.id, id))
+      .execute()
+  }
+
+  private getScheduleResetQuery(id: string, time: ScheduleTime) {
+    if (process.env.ENVIRONMENT === 'production') {
+      return `SELECT cron.schedule_in_database('${id}', '${this.dateForCron(time)}', $$
+        UPDATE public.whatsapp_conversation SET conversation_status = 0, scheduled_reset_id = null WHERE id = '${id}'; SELECT cron.unschedule('${id}') FROM cron.job;
+      $$, 'replyly_service');`
+    } else {
+      return `SELECT cron.schedule('${id}', '${this.dateForCron(time)}', $$
+        UPDATE public.whatsapp_conversation SET conversation_status = 0, scheduled_reset_id = null WHERE id = '${id}'; SELECT cron.unschedule('${id}') FROM cron.job;
+      $$);`
+    }
+  }
+
+  private dateForCron(time: ScheduleTime): string {
+    let date = new Date()
+    date = DateFormatter.addSeconds(date, 0)
+    date = DateFormatter.addMinutes(date, time.minutes || 0)
+    date = DateFormatter.addHours(date, time.hours || 0)
+    date = DateFormatter.addDays(date, time.dayOfMonth || 0)
+    date = DateFormatter.addMonths(date, time.month || 0)
+    date = new Date(DateFormatter.format(date, 'YYYY-MM-DDTHH:mm:ss', true))
+
+    return `${date.getMinutes()} ${date.getHours()} ${date.getDate()} ${date.getMonth() + 1} *`;
   }
 }

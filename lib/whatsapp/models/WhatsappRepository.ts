@@ -1,5 +1,6 @@
 import {ConversationStatus} from "@/lib/common/models/ConversationStatus";
 import {Exception} from "@/lib/common/models/Exception";
+import {ScheduleTime} from "@/lib/common/models/ScheduleTime";
 
 export class RepositoryException implements Exception {
   constructor(readonly message: string) {}
@@ -68,4 +69,6 @@ export interface WhatsappRepository {
   getClientId(whatsappChatId: string): Promise<string|null>;
 
   createClient(whatsappChatId: string): Promise<string>;
+
+  scheduleBotReset(id: string, time: ScheduleTime): Promise<void>;
 }

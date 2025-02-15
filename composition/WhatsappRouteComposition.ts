@@ -8,16 +8,14 @@ import {WhatsappRepositoryImpl} from "@/lib/whatsapp/respositories/WhatsappRepos
 import {SendMessageToClientUseCase} from "@/lib/whatsapp/useCases/SendMessageToClientUseCase";
 import {IncreaseMessageCountUsageUseCase} from "@/lib/whatsapp/useCases/IncreaseMessageCountUsageUseCase";
 import {GetConversationIdUseCase} from "@/lib/whatsapp/useCases/GetConversationIdUseCase";
-import {IsTimeWithinLocationBusinessHoursUseCase} from "@/lib/whatsapp/useCases/IsTimeWithinLocationBusinessHoursUseCase";
 import {IsNumberBlackListedUseCase} from "@/lib/whatsapp/useCases/IsNumberBlackListedUseCase";
 import {ScheduleBotResetUseCase} from "@/lib/whatsapp/useCases/ScheduleBotResetUseCase";
-import {SchedulerRepository} from "@/lib/scheduler/SchedulerRepository";
-import {SchedulerRepositoryImpl} from "@/lib/scheduler/SchedulerRepositoryImpl";
 import {GetBestResponseUseCase} from "@/lib/whatsapp/useCases/GetBestResponseUseCase";
 import {GetBestResponseForAudioUseCase} from "@/lib/whatsapp/useCases/GetBestResponseForAudioUseCase";
 import {GetClientIdUseCase} from "@/lib/whatsapp/useCases/GetClientIdUseCase";
 import {DecodeMediaMessageUseCase} from "@/lib/whatsapp/useCases/DecodeMediaMessageUseCase";
 import {DeleteDecodedFileUseCase} from "@/lib/whatsapp/useCases/DeleteDecodedFileUseCase";
+import {ReadReceivedMessageUseCase} from "@/lib/whatsapp/useCases/ReadReceivedMessageUseCase";
 
 export class WhatsappRouteComposition {
   private readonly appCompositionRoot: AppComposition
@@ -28,7 +26,6 @@ export class WhatsappRouteComposition {
   private sendMessageToClientUseCase!: SendMessageToClientUseCase
   private increaseMessageCountUseCase!: IncreaseMessageCountUsageUseCase
   private getConversationIdUseCase!: GetConversationIdUseCase
-  private timeWithinLocationBusinessHoursUseCase!: IsTimeWithinLocationBusinessHoursUseCase
   private isNumberBlackListedUseCase!: IsNumberBlackListedUseCase
   private scheduleBotResetUseCase!: ScheduleBotResetUseCase
   private getBestResponseUseCase!: GetBestResponseUseCase
@@ -36,6 +33,7 @@ export class WhatsappRouteComposition {
   private getDecodeMediaMessageUseCase!: DecodeMediaMessageUseCase
   private getDeleteDecodedFileUseCase!: DeleteDecodedFileUseCase
   private getClientIdUseCase!: GetClientIdUseCase
+  private readReceivedMessageUseCase!: ReadReceivedMessageUseCase
 
   constructor(appCompositionRoot: AppComposition) {
     this.appCompositionRoot = appCompositionRoot
@@ -47,10 +45,6 @@ export class WhatsappRouteComposition {
 
   private provideWhatsappRepository(): WhatsappRepository {
     return this.whatsappRepository ??= new WhatsappRepositoryImpl(this.appCompositionRoot.getDatabase())
-  }
-
-  private provideSchedulerRepository(): SchedulerRepository {
-    return this.appCompositionRoot.provideSchedulerRepository()
   }
 
   private provideDeactivatePlanUseCase(): DeactivatePlanUseCase {
@@ -85,11 +79,6 @@ export class WhatsappRouteComposition {
     return this.getConversationIdUseCase ??= new GetConversationIdUseCase(this.provideWhatsappRepository())
   }
 
-  provideTimeWithinLocationBusinessHoursUseCase() {
-    return this.timeWithinLocationBusinessHoursUseCase ??=
-      new IsTimeWithinLocationBusinessHoursUseCase(this.provideWhatsappRepository())
-  }
-
   provideIsNumberBlackListedUseCase(): IsNumberBlackListedUseCase {
     return this.isNumberBlackListedUseCase ??=
       new IsNumberBlackListedUseCase(this.provideWhatsappRepository())
@@ -97,7 +86,7 @@ export class WhatsappRouteComposition {
 
   provideScheduleBotResetUseCase(): ScheduleBotResetUseCase {
     return this.scheduleBotResetUseCase ??=
-      new ScheduleBotResetUseCase(this.provideUpdateConversationStatusUseCase(), this.provideSchedulerRepository())
+      new ScheduleBotResetUseCase(this.provideWhatsappRepository())
   }
 
   provideGetBestResponseUseCase() {
@@ -121,5 +110,9 @@ export class WhatsappRouteComposition {
 
   provideGetClientIdUseCase() {
     return this.getClientIdUseCase ??= new GetClientIdUseCase(this.provideWhatsappRepository())
+  }
+
+  provideReadReceivedMessageUseCase() {
+    return this.readReceivedMessageUseCase ??= new ReadReceivedMessageUseCase()
   }
 }

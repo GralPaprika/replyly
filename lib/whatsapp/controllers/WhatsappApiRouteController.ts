@@ -151,7 +151,7 @@ export class WhatsappApiRouteController {
     }
 
     if (response !== WAIT_FOR_RESPONSE) {
-      console.log(await this.sendResponseMessage(whatsappId, data, response))
+      console.log('Sent message', await this.sendResponseMessage(whatsappId, data, response))
     } else {
       console.log(`Waiting for response for conversation ${conversationId}`)
     }
@@ -160,7 +160,7 @@ export class WhatsappApiRouteController {
 
     await this.increaseMessageCountUsage(whatsappId)
 
-    this.scheduleBotReset(conversationId)
+    await this.scheduleBotReset(conversationId)
 
     return {
       body: {message: ResponseMessage.Responded},
@@ -189,10 +189,9 @@ export class WhatsappApiRouteController {
     const fromServer = data.messages.sentFromServer
     const syncUpdate = data.messages.message.protocolMessage?.type === 'EPHEMERAL_SYNC_RESPONSE'
 
-    if (!fromMe && !syncUpdate) return MessageSource.Client
-    if (fromMe && fromServer || syncUpdate) return MessageSource.Bot
-    console.log(`fromMe: ${fromMe}, fromServer: ${fromServer}, syncUpdate: ${syncUpdate}`)
-    return MessageSource.BusinessUser
+    if (fromServer) return MessageSource.Bot
+    if (fromMe && !syncUpdate) return MessageSource.BusinessUser
+    return MessageSource.Client
   }
 
   private async hasActivePlan(whatsappId: string): Promise<boolean> {
@@ -203,8 +202,8 @@ export class WhatsappApiRouteController {
     await this.composition.provideUpdateConversationStatusUseCase().execute(conversationId, status)
   }
 
-  private scheduleBotReset(conversationId: string) {
-    this.composition.provideScheduleBotResetUseCase().execute(conversationId)
+  private async scheduleBotReset(conversationId: string) {
+    await this.composition.provideScheduleBotResetUseCase().execute(conversationId)
   }
 
   private async sendResponseMessage(
@@ -215,7 +214,9 @@ export class WhatsappApiRouteController {
     const recipientId = data.messages.key.remoteJid
     const expiration = data.messages?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.expiration // Windows
       ?? (data.messages?.message?.extendedTextMessage?.contextInfo?.ephemeralSettingTimestamp as number|undefined) // Android
-    return await this.composition.provideSendMessageToClientUseCase().execute(whatsappId, recipientId, content, expiration)
+    const result = await this.composition.provideSendMessageToClientUseCase().execute(whatsappId, recipientId, content, expiration)
+    await this.composition.provideReadReceivedMessageUseCase().execute(data.messages.key, whatsappId)
+    return result
   }
 
   private async increaseMessageCountUsage(whatsappId: string): Promise<void> {
