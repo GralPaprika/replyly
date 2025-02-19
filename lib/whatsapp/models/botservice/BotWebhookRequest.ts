@@ -1,5 +1,5 @@
 export interface BotWebhookRequest {
   chatId: string,
-  whatsappBusinessLocationId: string,
+  whatsappId: string,
   message?: string,
 }

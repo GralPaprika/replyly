@@ -134,14 +134,14 @@ export class WhatsappApiRouteController {
     if (message) {
       console.log(`Message received: ${message}`)
       response = await this.getBestResponse({
-        whatsappBusinessLocationId: whatsappId,
+        whatsappId: whatsappId,
         chatId: clientId,
         message: message,
       })
     } else if (audioMessage) {
       console.log(`Audio message received: ${audioMessage.url}`)
       const messageId = data.messages.key.id
-      response = await this.getBestResponseForAudio(conversationId, messageId, audioMessage)
+      response = await this.getBestResponseForAudio(conversationId, messageId, audioMessage, clientId, whatsappId)
     } else {
       console.log(`Invalid message received`)
       return {
@@ -232,7 +232,7 @@ export class WhatsappApiRouteController {
     return await this.composition.provideGetBestResponseUseCase().execute(requestData)
   }
 
-  private async getBestResponseForAudio(conversationId: string, messageId: string, audioMessage: AudioMessage): Promise<string> {
+  private async getBestResponseForAudio(conversationId: string, messageId: string, audioMessage: AudioMessage, chatId: string, whatsappId: string): Promise<string> {
     const destinationPath = Path.resolve(__dirname, '..', '..', '..', '..', 'public', 'whatsapp', 'audio')
 
     if (!fs.existsSync(destinationPath)) {
@@ -244,6 +244,8 @@ export class WhatsappApiRouteController {
       messageId,
       audioMessage,
       destinationPath,
+      chatId,
+      whatsappId,
     )
   }
 
