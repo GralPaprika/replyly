@@ -1,6 +1,6 @@
-export interface BotWebhookRequest {
+export interface BotAudioWebhookRequest {
   businessId: string,
   chatId: string,
   whatsappId: string,
-  message?: string,
+  voice: string,
 }

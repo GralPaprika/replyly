@@ -244,6 +244,28 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .execute()
   }
 
+  async getBusinessId(whatsappId: string): Promise<string> {
+    const result = await this.db
+      .select({
+        businessId: businessLocations.businessId,
+      })
+      .from(whatsapp)
+      .innerJoin(
+        businessLocations,
+        eq(whatsapp.businessLocationId, businessLocations.id)
+      )
+      .where(
+        and(eq(whatsapp.id, whatsappId),
+         and(
+          isFalse(whatsapp.deleted),
+          isFalse(businessLocations.deleted)
+         ))
+      )
+      .execute()
+
+    return result[0].businessId
+  }
+
   private getScheduleResetQuery(id: string, time: ScheduleTime) {
     if (process.env.ENVIRONMENT === 'production') {
       return `SELECT cron.schedule_in_database('${id}', '${this.dateForCron(time)}', $$

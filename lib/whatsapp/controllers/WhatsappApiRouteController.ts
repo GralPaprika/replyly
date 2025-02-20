@@ -128,20 +128,29 @@ export class WhatsappApiRouteController {
       data.messages?.message?.conversation // Android message doesn't disappear.
 
     const audioMessage = data.messages.message.audioMessage
+    const businessId = await this.composition.provideGetBusinessIdUseCase().execute(whatsappId)
 
     let response: string
 
     if (message) {
       console.log(`Message received: ${message}`)
       response = await this.getBestResponse({
-        whatsappId: whatsappId,
+        businessId,
+        whatsappId,
+        message,
         chatId: clientId,
-        message: message,
       })
     } else if (audioMessage) {
       console.log(`Audio message received: ${audioMessage.url}`)
       const messageId = data.messages.key.id
-      response = await this.getBestResponseForAudio(conversationId, messageId, audioMessage, clientId, whatsappId)
+      response = await this.getBestResponseForAudio(
+        conversationId,
+        audioMessage,
+        messageId,
+        clientId,
+        whatsappId,
+        businessId,
+      )
     } else {
       console.log(`Invalid message received`)
       return {
@@ -232,7 +241,14 @@ export class WhatsappApiRouteController {
     return await this.composition.provideGetBestResponseUseCase().execute(requestData)
   }
 
-  private async getBestResponseForAudio(conversationId: string, messageId: string, audioMessage: AudioMessage, chatId: string, whatsappId: string): Promise<string> {
+  private async getBestResponseForAudio(
+    conversationId: string,
+    audioMessage: AudioMessage,
+    messageId: string,
+    chatId: string,
+    whatsappId: string,
+    businessId: string,
+  ): Promise<string> {
     const destinationPath = Path.resolve(__dirname, '..', '..', '..', '..', 'public', 'whatsapp', 'audio')
 
     if (!fs.existsSync(destinationPath)) {
@@ -241,11 +257,12 @@ export class WhatsappApiRouteController {
 
     return await this.composition.provideGetBestResponseForAudioUseCase().execute(
       conversationId,
-      messageId,
       audioMessage,
+      messageId,
       destinationPath,
       chatId,
       whatsappId,
+      businessId,
     )
   }
 

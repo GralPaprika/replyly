@@ -3,6 +3,7 @@ import {AudioMessage} from "@/lib/whatsapp/models/webhook/MessageWebhookSchema";
 import {DecodeMediaMessageUseCase} from "@/lib/whatsapp/useCases/DecodeMediaMessageUseCase";
 import {AudioType} from "@/lib/util/decode";
 import {DeleteDecodedFileUseCase} from "@/lib/whatsapp/useCases/DeleteDecodedFileUseCase";
+import {BotAudioWebhookRequest} from "@/lib/whatsapp/models/botservice/BotAudioWebhookRequest";
 
 export class GetBestResponseForAudioUseCase {
   constructor(
@@ -12,11 +13,12 @@ export class GetBestResponseForAudioUseCase {
 
   async execute(
     conversationId: string,
-    messageId: string,
     audioData: AudioMessage,
+    messageId: string,
     destinationPath: string,
     chatId: string,
-    whatsappId: string
+    whatsappId: string,
+    businessId: string,
   ): Promise<string> {
     const audioFile = await this.decodeMediaMessageUseCase.execute({
       url: audioData.url,
@@ -29,16 +31,19 @@ export class GetBestResponseForAudioUseCase {
 
     const serverName = process.env.SERVER_URL || '';
 
+    const body: BotAudioWebhookRequest = {
+      businessId,
+      chatId,
+      whatsappId,
+      voice: `${serverName}/api/public/whatsapp/audio/${audioFile}`
+    }
+
     const response = await fetch(process.env.BOT_SERVICE_URL || '', {
       method: HttpMethod.POST,
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        chatId: chatId,
-        whatsappId: whatsappId,
-        voice: `${serverName}/api/public/whatsapp/audio/${audioFile}`
-      })
+      body: JSON.stringify(body)
     });
 
     console.log('URL', `${serverName}/api/public/whatsapp/audio/${audioFile}`)

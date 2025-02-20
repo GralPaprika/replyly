@@ -71,4 +71,6 @@ export interface WhatsappRepository {
   createClient(whatsappChatId: string): Promise<string>;
 
   scheduleBotReset(id: string, time: ScheduleTime): Promise<void>;
+
+  getBusinessId(whatsappId: string): Promise<string>;
 }
