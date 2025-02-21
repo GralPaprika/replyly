@@ -9,6 +9,7 @@ export interface ContextInfo {
   ephemeralSettingTimestamp?: string;
   disappearingMode?: DisappearingMode;
   mentionedJid?: string[];
+  entryPointConversionSource?: string;
 }
 
 export interface ExtendedTextMessage {
@@ -100,7 +101,7 @@ export interface MessageContent {
   conversation?: string;
   protocolMessage?: ProtocolMessage;
   extendedTextMessage?: ExtendedTextMessage;
-  messageContextInfo: MessageContextInfo;
+  messageContextInfo?: MessageContextInfo;
   ephemeralMessage?: EphemeralMessage;
   stickerMessage?: StickerMessage;
   senderKeyDistributionMessage?: SenderKeyDistributionMessage;
