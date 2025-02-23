@@ -1,9 +1,11 @@
 import {AppComposition} from "@/composition/AppComposition";
 import {SignUpUseCase} from "@/lib/auth/usecases/SignUpUseCase";
+import {SignInUseCase} from "@/lib/auth/usecases/SignInUseCase";
 
 export class AuthComposition {
   private readonly appCompositionRoot: AppComposition
   private signUpUseCase!: SignUpUseCase
+  private signInUseCase!: SignInUseCase
 
   private constructor(appCompositionRoot: AppComposition) {
     this.appCompositionRoot = appCompositionRoot
@@ -19,5 +21,9 @@ export class AuthComposition {
 
   provideSignUpUseCase() {
     return this.signUpUseCase ??= new SignUpUseCase(this.provideSupabaseClient())
+  }
+
+  provideSignInUseCase() {
+    return this.signInUseCase ??= new SignInUseCase(this.provideSupabaseClient())
   }
 }
