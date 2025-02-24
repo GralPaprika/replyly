@@ -1,11 +1,26 @@
 import {AppComposition} from "@/composition/AppComposition";
 import {SignUpUseCase} from "@/lib/auth/usecases/SignUpUseCase";
 import {SignInUseCase} from "@/lib/auth/usecases/SignInUseCase";
+import {AuthRepository} from "@/lib/auth/models/AuthRepository";
+import {AuthRepositoryImpl} from "@/lib/auth/repositories/AuthRepositoryImpl";
+import {BusinessRepository} from "@/lib/business/models/BusinessRepository";
+import {BusinessRepositoryImpl} from "@/lib/business/repositories/BusinessRepositoryImpl";
+import {CreateBusinessUseCase} from "@/lib/business/usecases/CreateBusinessUseCase";
+import {IsValidSignUpDataUseCase} from "@/lib/auth/usecases/IsValidSignUpDataUseCase";
+import Ajv, {ValidateFunction} from "ajv";
+import {businessDataSchema} from "@/lib/auth/models/BusinessData";
 
 export class AuthComposition {
   private readonly appCompositionRoot: AppComposition
+  private authRepository!: AuthRepository
+  private businessRepository!: BusinessRepository
+  private ajv!: Ajv
+  private businessDataValidator!: ValidateFunction
   private signUpUseCase!: SignUpUseCase
   private signInUseCase!: SignInUseCase
+  private createBusinessUseCase!: CreateBusinessUseCase
+  private isValidSignUpDataUseCase!: IsValidSignUpDataUseCase
+
 
   private constructor(appCompositionRoot: AppComposition) {
     this.appCompositionRoot = appCompositionRoot
@@ -19,11 +34,38 @@ export class AuthComposition {
     return this.appCompositionRoot.getSupabaseClient()
   }
 
+  private provideAuthRepository() {
+    return this.authRepository ??= new AuthRepositoryImpl(this.provideSupabaseClient())
+  }
+
+  private provideBusinessRepository() {
+    return this.businessRepository ??= new BusinessRepositoryImpl(this.appCompositionRoot.getDatabase())
+  }
+
+  private provideCreateBusinessUseCase() {
+    return this.createBusinessUseCase ??= new CreateBusinessUseCase(this.provideBusinessRepository())
+  }
+
+  private provideAvj() {
+    return this.ajv ??= new Ajv()
+  }
+
+  private provideBusinessDataValidator() {
+    return this.businessDataValidator ??= this.provideAvj().compile(businessDataSchema)
+  }
+
+  provideIsValidSignUpDataUseCase() {
+    return this.isValidSignUpDataUseCase ??= new IsValidSignUpDataUseCase(this.provideBusinessDataValidator())
+  }
+
   provideSignUpUseCase() {
-    return this.signUpUseCase ??= new SignUpUseCase(this.provideSupabaseClient())
+    return this.signUpUseCase ??= new SignUpUseCase(
+      this.provideAuthRepository(),
+      this.provideCreateBusinessUseCase(),
+    )
   }
 
   provideSignInUseCase() {
-    return this.signInUseCase ??= new SignInUseCase(this.provideSupabaseClient())
+    return this.signInUseCase ??= new SignInUseCase(this.provideAuthRepository())
   }
 }

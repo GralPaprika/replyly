@@ -5,7 +5,7 @@ import {AuthComposition} from "@/composition/AuthComposition";
 export async function POST(request: Request) {
   const controller = new AuthController(AuthComposition.provideInstance())
 
-  const result = await controller.signUp(await request.json())
+  const {body, init} = await controller.signUp(await request.json())
 
-  return NextResponse.json(result, {status: 200})
+  return NextResponse.json(body, init)
 }

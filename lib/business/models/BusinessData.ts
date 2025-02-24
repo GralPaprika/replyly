@@ -1,4 +1,4 @@
-export interface CreateBusinessRequest {
+export interface BusinessData {
   businessName: string;
   email: string;
   phoneNumber: string,
@@ -7,5 +7,5 @@ export interface CreateBusinessRequest {
   secondLastName?: string;
   displayName: string;
   address: string;
-  schedule: string;
+  schedule?: string;
 }

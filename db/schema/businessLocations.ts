@@ -13,7 +13,7 @@ export const businessLocations = pgTable('business_locations', {
   businessId: uuid('business_id').notNull().references(() => businesses.id),
   address: text('address').notNull(),
   isGlobal: boolean('is_global').notNull(),
-  schedule: jsonb('schedule').notNull(),
+  schedule: jsonb('schedule'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   deleted: boolean('deleted').default(false).notNull(),
 })

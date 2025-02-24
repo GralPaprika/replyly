@@ -1,0 +1,1 @@
+ALTER TABLE "business_locations" ALTER COLUMN "schedule" DROP NOT NULL;
