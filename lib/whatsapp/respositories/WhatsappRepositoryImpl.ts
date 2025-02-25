@@ -277,15 +277,9 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
 
 
   private getScheduleResetQuery(id: string, time: ScheduleTime) {
-    if (process.env.ENVIRONMENT === 'production') {
-      return `SELECT cron.schedule_in_database('${id}', '${this.dateForCron(time)}', $$
-        UPDATE public.whatsapp_conversation SET conversation_status = 0, scheduled_reset_id = null WHERE id = '${id}'; SELECT cron.unschedule('${id}') FROM cron.job;
-      $$, 'replyly_service');`
-    } else {
-      return `SELECT cron.schedule('${id}', '${this.dateForCron(time)}', $$
-        UPDATE public.whatsapp_conversation SET conversation_status = 0, scheduled_reset_id = null WHERE id = '${id}'; SELECT cron.unschedule('${id}') FROM cron.job;
-      $$);`
-    }
+    return `SELECT cron.schedule('${id}', '${this.dateForCron(time)}', $$
+      UPDATE public.whatsapp_conversation SET conversation_status = 0, scheduled_reset_id = null WHERE id = '${id}'; SELECT cron.unschedule('${id}') FROM cron.job;
+    $$);`
   }
 
   private dateForCron(time: ScheduleTime): string {
