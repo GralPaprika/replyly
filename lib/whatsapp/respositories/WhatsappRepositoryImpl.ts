@@ -6,12 +6,13 @@ import {businessPlan} from "@/db/schema/businessPlan";
 import {isFalse, isTrue} from "@/lib/common/helpers/DatabaseFunctions";
 import {networksPerBusiness} from "@/db/schema/networksPerBusiness";
 import {ConversationStatus} from "@/lib/common/models/ConversationStatus";
-import {RepositoryException, WhatsappRepository} from "@/lib/whatsapp/models/WhatsappRepository";
+import {WhatsappRepository} from "@/lib/whatsapp/models/WhatsappRepository";
 import {whatsappConversation} from "@/db/schema/whatsappConversation";
 import {whatsappContacts} from "@/db/schema/whatsappContacts";
 import {clients} from "@/db/schema/clients";
 import DateFormatter from "date-and-time";
 import {ScheduleTime} from "@/lib/common/models/ScheduleTime";
+import {RepositoryException} from "@/lib/common/models/RepositoryException";
 
 enum ErrorMessage {
   ConversationStatusNotFound = 'Conversation status not found',
@@ -265,6 +266,15 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
 
     return result[0].businessId
   }
+
+  async updateEphemeralExpiration(whatsappId: string, clientId: string, expiration: number): Promise<void> {
+    await this.db
+      .update(whatsappConversation)
+      .set({ephemeralExpiration: expiration})
+      .where(and(and(eq(whatsappConversation.whatsappId, whatsappId), eq(whatsappConversation.clientId, clientId)), isFalse(whatsappConversation.deleted)))
+      .execute()
+  }
+
 
   private getScheduleResetQuery(id: string, time: ScheduleTime) {
     if (process.env.ENVIRONMENT === 'production') {
