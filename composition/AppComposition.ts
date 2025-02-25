@@ -1,10 +1,12 @@
 import {drizzle, PostgresJsDatabase} from "drizzle-orm/postgres-js"
 import postgres from "postgres"
+import {createClient, SupabaseClient} from "@supabase/supabase-js";
 import Ajv from "ajv";
 
 export class AppComposition {
   private static instance: AppComposition
   private database!: PostgresJsDatabase
+  private supabase!: SupabaseClient
   private ajv!: Ajv
 
   private constructor() {}
@@ -21,6 +23,10 @@ export class AppComposition {
       this.database = drizzle(client)
     }
     return this.database
+  }
+
+  getSupabaseClient() {
+    return this.supabase ??= createClient(process.env.SUPABASE_URL ?? '', process.env.SUPABASE_KEY ?? '')
   }
 
   getAjv(): Ajv {
