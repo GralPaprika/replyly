@@ -7,14 +7,13 @@ import {BusinessRepository} from "@/lib/business/models/BusinessRepository";
 import {BusinessRepositoryImpl} from "@/lib/business/repositories/BusinessRepositoryImpl";
 import {CreateBusinessUseCase} from "@/lib/business/usecases/CreateBusinessUseCase";
 import {IsValidSignUpDataUseCase} from "@/lib/auth/usecases/IsValidSignUpDataUseCase";
-import Ajv, {ValidateFunction} from "ajv";
 import {businessDataSchema} from "@/lib/auth/models/BusinessData";
+import {ValidateFunction} from "ajv";
 
 export class AuthComposition {
   private readonly appCompositionRoot: AppComposition
   private authRepository!: AuthRepository
   private businessRepository!: BusinessRepository
-  private ajv!: Ajv
   private businessDataValidator!: ValidateFunction
   private signUpUseCase!: SignUpUseCase
   private signInUseCase!: SignInUseCase
@@ -46,12 +45,8 @@ export class AuthComposition {
     return this.createBusinessUseCase ??= new CreateBusinessUseCase(this.provideBusinessRepository())
   }
 
-  private provideAvj() {
-    return this.ajv ??= new Ajv()
-  }
-
   private provideBusinessDataValidator() {
-    return this.businessDataValidator ??= this.provideAvj().compile(businessDataSchema)
+    return this.businessDataValidator ??= this.appCompositionRoot.getAjv().compile(businessDataSchema)
   }
 
   provideIsValidSignUpDataUseCase() {
