@@ -12,6 +12,7 @@ export const plans = pgTable('plans', {
   description: text('description').notNull(),
   price: numeric('price').notNull(),
   messagesLimit: integer ('messages_limit').notNull(),
+  notificationsLimit: integer ('notifications_limit').notNull().default(0),
   regionId: uuid('region_id').notNull(),
   enumId: integer('enum_id').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),

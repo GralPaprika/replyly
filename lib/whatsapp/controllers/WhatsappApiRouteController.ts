@@ -160,7 +160,7 @@ export class WhatsappApiRouteController {
     }
 
     if (response !== WAIT_FOR_RESPONSE) {
-      console.log('Sent message', await this.sendResponseMessage(whatsappId, data, response))
+      console.log('Sent message', await this.sendResponseMessage(whatsappId, clientId, data, response))
     } else {
       console.log(`Waiting for response for conversation ${conversationId}`)
     }
@@ -217,6 +217,7 @@ export class WhatsappApiRouteController {
 
   private async sendResponseMessage(
     whatsappId: string,
+    clientId: string,
     data: WebHookData,
     content: string,
   ): Promise<SendMessageResponseSchema> {
@@ -225,6 +226,7 @@ export class WhatsappApiRouteController {
       ?? (data.messages?.message?.extendedTextMessage?.contextInfo?.ephemeralSettingTimestamp as number|undefined) // Android
     const result = await this.composition.provideSendMessageToClientUseCase().execute(whatsappId, recipientId, content, expiration)
     await this.composition.provideReadReceivedMessageUseCase().execute(data.messages.key, whatsappId)
+    await this.composition.provideUpdateEphemeralUseCase().execute(whatsappId, clientId, expiration ?? null)
     return result
   }
 

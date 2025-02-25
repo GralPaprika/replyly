@@ -8,5 +8,6 @@ export const whatsappConversation = pgTable('whatsapp_conversation', {
   clientId: uuid('client_id').notNull().references(() => clients.id),
   conversationStatus: integer('conversation_status').notNull(),
   scheduledResetId: uuid('scheduled_reset_id'),
+  ephemeralExpiration: integer('ephemeral_expiration'),
   deleted: boolean('deleted').default(false).notNull(),
 })

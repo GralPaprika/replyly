@@ -1,9 +1,11 @@
 import {drizzle, PostgresJsDatabase} from "drizzle-orm/postgres-js"
 import postgres from "postgres"
+import Ajv from "ajv";
 
 export class AppComposition {
   private static instance: AppComposition
   private database!: PostgresJsDatabase
+  private ajv!: Ajv
 
   private constructor() {}
 
@@ -19,5 +21,9 @@ export class AppComposition {
       this.database = drizzle(client)
     }
     return this.database
+  }
+
+  getAjv(): Ajv {
+    return this.ajv ??= new Ajv()
   }
 }

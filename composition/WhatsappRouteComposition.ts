@@ -17,6 +17,7 @@ import {DecodeMediaMessageUseCase} from "@/lib/whatsapp/useCases/DecodeMediaMess
 import {DeleteDecodedFileUseCase} from "@/lib/whatsapp/useCases/DeleteDecodedFileUseCase";
 import {ReadReceivedMessageUseCase} from "@/lib/whatsapp/useCases/ReadReceivedMessageUseCase";
 import {GetBusinessIdUseCase} from "@/lib/whatsapp/useCases/GetBusinessIdUseCase";
+import {UpdateEphemeralUseCase} from "@/lib/whatsapp/useCases/UpdateEphemeralUseCase";
 
 export class WhatsappRouteComposition {
   private readonly appCompositionRoot: AppComposition
@@ -36,6 +37,7 @@ export class WhatsappRouteComposition {
   private getClientIdUseCase!: GetClientIdUseCase
   private readReceivedMessageUseCase!: ReadReceivedMessageUseCase
   private getBusinessIdUseCase!: GetBusinessIdUseCase
+  private updateEphemeralUseCase!: UpdateEphemeralUseCase
 
   constructor(appCompositionRoot: AppComposition) {
     this.appCompositionRoot = appCompositionRoot
@@ -120,5 +122,9 @@ export class WhatsappRouteComposition {
 
   provideGetBusinessIdUseCase() {
     return this.getBusinessIdUseCase ??= new GetBusinessIdUseCase(this.provideWhatsappRepository())
+  }
+
+  provideUpdateEphemeralUseCase() {
+    return this.updateEphemeralUseCase ??= new UpdateEphemeralUseCase(this.provideWhatsappRepository())
   }
 }

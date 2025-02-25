@@ -18,5 +18,7 @@ export const businessPlan = pgTable('business_plan', {
   endDate: timestamp('end_date').notNull(),
   active: boolean('active').default(true).notNull(),
   limit: integer('plan_limit'),
+  reminderLimit: integer('reminder_limit'),
   usage: integer('usage').default(0).notNull(),
+  remindersUsage: integer('reminders_usage').default(0).notNull(),
 })
