@@ -13,6 +13,7 @@ import {clients} from "@/db/schema/clients";
 import DateFormatter from "date-and-time";
 import {ScheduleTime} from "@/lib/common/models/ScheduleTime";
 import {RepositoryException} from "@/lib/common/models/RepositoryException";
+import {secretaries} from "@/db/schema/secretaries";
 
 enum ErrorMessage {
   ConversationStatusNotFound = 'Conversation status not found',
@@ -192,7 +193,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .from(clients)
       .where(
         and(
-          eq(clients.whatsappId, whatsappChatId),
+          eq(clients.remoteJid, whatsappChatId),
           isFalse(clients.deleted),
         ),
       )
@@ -205,7 +206,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
     const result = await this.db
       .insert(clients)
       .values({
-        whatsappId: whatsappChatId,
+        remoteJid: whatsappChatId,
       })
       .returning({ id: clients.id })
 
@@ -273,6 +274,14 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .set({ephemeralExpiration: expiration})
       .where(and(and(eq(whatsappConversation.whatsappId, whatsappId), eq(whatsappConversation.clientId, clientId)), isFalse(whatsappConversation.deleted)))
       .execute()
+  }
+
+  async isSecretaryUser(remoteUserId: string): Promise<boolean> {
+    return (await this.db
+      .select({ id: secretaries.id })
+      .from(secretaries)
+      .where(and(eq(secretaries.remoteJid, remoteUserId), isFalse(secretaries.deleted)))
+      .execute()).length === 1
   }
 
 

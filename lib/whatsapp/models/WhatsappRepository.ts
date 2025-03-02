@@ -70,4 +70,6 @@ export interface WhatsappRepository {
   getBusinessId(whatsappId: string): Promise<string>;
 
   updateEphemeralExpiration(whatsappId: string, clientId: string, expiration: number | null): Promise<void>;
+
+  isSecretaryUser(remoteUserId: string): Promise<boolean>;
 }
