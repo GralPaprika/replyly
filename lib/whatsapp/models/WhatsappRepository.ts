@@ -1,5 +1,6 @@
 import {ConversationStatus} from "@/lib/common/models/ConversationStatus";
 import {ScheduleTime} from "@/lib/common/models/ScheduleTime";
+import {User} from "@/lib/whatsapp/models/User";
 
 export interface WhatsappRepository {
   /**
@@ -71,5 +72,11 @@ export interface WhatsappRepository {
 
   updateEphemeralExpiration(whatsappId: string, clientId: string, expiration: number | null): Promise<void>;
 
+  updateEphemeralExpirationSecretary(secretaryId: string, userId: string, expiration: number | null): Promise<void>;
+
   isSecretaryUser(remoteUserId: string): Promise<boolean>;
+
+  getUserFromWhatsappJid(remoteUserJid: string): Promise<User | null>;
+
+  getLocationsFromUser(userId: string): Promise<string[]>;
 }

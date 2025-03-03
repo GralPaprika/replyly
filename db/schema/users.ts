@@ -7,6 +7,7 @@ export const users = pgTable('users', {
   username: text('username').unique(),
   password: text('password'),
   email: text('email'),
+  phoneNumber: text('phone_number'),
   roleId: integer('role_id').notNull(),
   businessId: uuid('business_id').references(() => businesses.id),
   deleted: boolean('deleted').default(false).notNull(),
