@@ -22,7 +22,7 @@ export class NotificationRepositoryImpl implements NotificationRepository {
     const result = await this.db
       .select({
         businessId: businessLocations.businessId,
-        clientWhatsappId: clients.whatsappId,
+        clientWhatsappId: clients.remoteJid,
         ephemeralExpiration: whatsappConversation.ephemeralExpiration,
       })
       .from(whatsappConversation)

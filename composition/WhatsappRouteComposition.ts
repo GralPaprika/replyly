@@ -18,6 +18,9 @@ import {DeleteDecodedFileUseCase} from "@/lib/whatsapp/useCases/DeleteDecodedFil
 import {ReadReceivedMessageUseCase} from "@/lib/whatsapp/useCases/ReadReceivedMessageUseCase";
 import {GetBusinessIdUseCase} from "@/lib/whatsapp/useCases/GetBusinessIdUseCase";
 import {UpdateEphemeralUseCase} from "@/lib/whatsapp/useCases/UpdateEphemeralUseCase";
+import {IsSecretaryUserUseCase} from "@/lib/whatsapp/useCases/IsSecretaryUserUseCase";
+import {HasUserSecretaryPermissionsUseCase} from "@/lib/whatsapp/useCases/HasUserSecretaryPermissionsUseCase";
+import {GetBestResponseFromSecretaryUseCase} from "@/lib/whatsapp/useCases/GetBestResponseFromSecretaryUseCase";
 
 export class WhatsappRouteComposition {
   private readonly appCompositionRoot: AppComposition
@@ -38,6 +41,9 @@ export class WhatsappRouteComposition {
   private readReceivedMessageUseCase!: ReadReceivedMessageUseCase
   private getBusinessIdUseCase!: GetBusinessIdUseCase
   private updateEphemeralUseCase!: UpdateEphemeralUseCase
+  private isSecretaryUserUseCase!: IsSecretaryUserUseCase
+  private hasUserSecretaryPermissionsUseCase!: HasUserSecretaryPermissionsUseCase
+  private getBestResponseFromSecretaryUseCase!: GetBestResponseFromSecretaryUseCase
 
   constructor(appCompositionRoot: AppComposition) {
     this.appCompositionRoot = appCompositionRoot
@@ -126,5 +132,19 @@ export class WhatsappRouteComposition {
 
   provideUpdateEphemeralUseCase() {
     return this.updateEphemeralUseCase ??= new UpdateEphemeralUseCase(this.provideWhatsappRepository())
+  }
+
+  provideIsSecretaryUserUseCase() {
+    return this.isSecretaryUserUseCase ??= new IsSecretaryUserUseCase(this.provideWhatsappRepository())
+  }
+
+  provideHasUserSecretaryPermissionsUseCase() {
+    return this.hasUserSecretaryPermissionsUseCase ??= new HasUserSecretaryPermissionsUseCase(this.provideWhatsappRepository())
+  }
+
+  provideGetBestResponseFromSecretaryUseCase() {
+    return this.getBestResponseFromSecretaryUseCase ??= new GetBestResponseFromSecretaryUseCase(
+      this.provideWhatsappRepository()
+    )
   }
 }

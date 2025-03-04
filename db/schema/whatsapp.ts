@@ -10,7 +10,6 @@ import {businessLocations} from "@/db/schema/businessLocations";
 export const whatsapp = pgTable('whatsapp', {
   id: uuid('id').defaultRandom().primaryKey(),
   businessLocationId: uuid('business_location_id').notNull().references(() => businessLocations.id),
-  phoneNumber: text('phone_number').notNull(),
   sessionStatus: integer('session_status').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   deleted: boolean('deleted').default(false).notNull(),

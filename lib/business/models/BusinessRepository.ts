@@ -9,5 +9,5 @@ export interface BusinessRepository {
   addLocation(location: BusinessLocation): Promise<string>;
   addUserToLocation(locationId: string, userId: string): Promise<void>;
   addNetwork(businessId: string, network: string): Promise<void>;
-  addWhatsapp(locationId: string, phone: string): Promise<string>;
+  addWhatsapp(locationId: string): Promise<string>;
 }

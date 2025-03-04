@@ -85,10 +85,10 @@ export class BusinessRepositoryImpl implements BusinessRepository {
     await this.db.insert(networksPerBusiness).values({businessId, networkId})
   }
 
-  async addWhatsapp(locationId: string, phone: string): Promise<string> {
+  async addWhatsapp(locationId: string): Promise<string> {
     const result = await this.db
       .insert(whatsapp)
-      .values({businessLocationId: locationId, phoneNumber: phone, sessionStatus: 0})
+      .values({businessLocationId: locationId, sessionStatus: 0})
       .returning({ id: whatsapp.id })
       .execute()
 

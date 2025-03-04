@@ -50,6 +50,20 @@
       "when": 1740497836651,
       "tag": "0006_gray_unicorn",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1740688360558,
+      "tag": "0007_great_tinkerer",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1740957267994,
+      "tag": "0008_tranquil_the_enforcers",
+      "breakpoints": true
     }
   ]
 }

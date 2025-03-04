@@ -17,7 +17,9 @@ enum ResponseMessage {
   UnknownError = 'Unknown error',
   Responded = 'Responded',
   GroupMessage = 'Group message ignored',
+  DoesNotHavePermission = 'User does not have permission',
   InvalidMessage = 'Invalid message',
+  PlanExpired = 'Plan expired',
 }
 
 export class WhatsappApiRouteController {
@@ -28,9 +30,6 @@ export class WhatsappApiRouteController {
     data: WebHookData
   ): Promise<RouteResponse> {
     try {
-      const clientId = await this.getClientId(this.getWhatsappChatId(data))
-      const conversationId = await this.getConversationId(whatsappId, clientId)
-
       if (this.isFromGroup(data)) {
         return {
           body: {message: ResponseMessage.GroupMessage},
@@ -38,7 +37,34 @@ export class WhatsappApiRouteController {
         }
       }
 
+      const remoteUserId = data.messages.key.remoteJid
+      if (await this.checkIfSenderIsBlackListed(whatsappId, remoteUserId)) {
+        return {
+          body: {message: ResponseMessage.Responded},
+          init: {status: HttpResponseCode.Ok},
+        }
+      }
+
+      if (await this.isSecretaryUser(whatsappId)) {
+        if (await this.hasUserSecretaryPermissions(remoteUserId)) {
+          return this.secretaryRespondToBusiness(whatsappId, remoteUserId, data)
+        }
+        return {
+          body: {message: ResponseMessage.DoesNotHavePermission},
+          init: {status: HttpResponseCode.Unauthorized},
+        }
+      }
+
+      if (!await this.hasActivePlan(whatsappId)) {
+        return {
+          body: {message: ResponseMessage.PlanExpired},
+          init: {status: HttpResponseCode.Unauthorized},
+        }
+      }
+
+      const clientId = await this.getClientId(remoteUserId)
       const source = await this.getMessageSource(data)
+      const conversationId = await this.getConversationId(whatsappId, clientId)
 
       if (source === MessageSource.Bot)
         return {
@@ -54,47 +80,8 @@ export class WhatsappApiRouteController {
         }
       }
 
-      if (!await this.hasActivePlan(whatsappId)) {
-        return {
-          body: {message: ResponseMessage.UnknownError},
-          init: {status: HttpResponseCode.ServerError},
-        }
-      }
+      return await this.respondToClient(whatsappId, conversationId, clientId, data);
 
-      const sender = data.messages.key.remoteJid
-      if (await this.checkIfSenderIsBlackListed(whatsappId, sender)) {
-        return {
-          body: {message: ResponseMessage.Responded},
-          init: {status: HttpResponseCode.Ok},
-        }
-      }
-
-      const conversationStatus = await this.getConversationStatus(conversationId)
-
-      if (
-        conversationStatus == ConversationStatus.Idle ||
-        conversationStatus == ConversationStatus.MessageReceived ||
-        conversationStatus == ConversationStatus.BotResponded
-      ){
-        return this.handleCreateResponse(
-          whatsappId,
-          conversationId,
-          clientId,
-          data as WebHookData,
-        )
-      }
-
-      if (conversationStatus == ConversationStatus.UserTookControl) {
-        return {
-          body: {message: ResponseMessage.Responded},
-          init: {status: HttpResponseCode.Ok},
-        }
-      }
-
-      return {
-        body: {message: ResponseMessage.UnknownError},
-        init: {status: HttpResponseCode.ServerError},
-      }
     } catch (exception) {
       if (exception instanceof HasActivePlanException) {
         const httpCode = exception.code !== HasActivePlanException.ErrorCode.SystemError ?
@@ -111,6 +98,71 @@ export class WhatsappApiRouteController {
           init: {status: HttpResponseCode.ServerError}
         }
       }
+    }
+  }
+
+  private async secretaryRespondToBusiness(secretaryId: string, remoteUserJid: string, data: WebHookData): Promise<RouteResponse> {
+    const fromMe = data.messages.key.fromMe
+    const fromServer = data.messages.sentFromServer
+    const sync = data.messages.message.protocolMessage?.type === 'EPHEMERAL_SYNC_RESPONSE'
+
+    if (sync || fromMe) {
+      return {
+        body: {message: ResponseMessage.Responded},
+        init: {status: HttpResponseCode.Ok},
+      }
+    }
+
+    const {userId, message} = await this.composition.provideGetBestResponseFromSecretaryUseCase().execute(remoteUserJid)
+
+    if (message !== WAIT_FOR_RESPONSE) {
+      console.log('Sent message', await this.sendResponseFromSecretary(
+        secretaryId,
+        userId,
+        data,
+        message,
+      ))
+    } else {
+      console.log(`Waiting for response from secretary ${secretaryId}`)
+    }
+
+    return {
+      body: {message: ResponseMessage.Responded},
+      init: {status: HttpResponseCode.Ok},
+    }
+  }
+
+  private async respondToClient(
+    whatsappId: string,
+    conversationId: string,
+    clientId: string,
+    data: WebHookData,
+  ): Promise<RouteResponse> {
+    const conversationStatus = await this.getConversationStatus(conversationId)
+
+    if (
+      conversationStatus == ConversationStatus.Idle ||
+      conversationStatus == ConversationStatus.MessageReceived ||
+      conversationStatus == ConversationStatus.BotResponded
+    ){
+      return this.handleCreateResponse(
+        whatsappId,
+        conversationId,
+        clientId,
+        data as WebHookData,
+      )
+    }
+
+    if (conversationStatus == ConversationStatus.UserTookControl) {
+      return {
+        body: {message: ResponseMessage.Responded},
+        init: {status: HttpResponseCode.Ok},
+      }
+    }
+
+    return {
+      body: {message: ResponseMessage.UnknownError},
+      init: {status: HttpResponseCode.ServerError},
     }
   }
 
@@ -177,10 +229,6 @@ export class WhatsappApiRouteController {
     }
   }
 
-  private getWhatsappChatId(schema: WebHookData): string {
-    return schema.messages.key.remoteJid
-  }
-
   private async getClientId(whatsappChatId: string): Promise<string> {
     return await this.composition.provideGetClientIdUseCase().execute(whatsappChatId)
   }
@@ -221,10 +269,10 @@ export class WhatsappApiRouteController {
     data: WebHookData,
     content: string,
   ): Promise<SendMessageResponseSchema> {
-    const recipientId = data.messages.key.remoteJid
+    const remoteUserId = data.messages.key.remoteJid
     const expiration = data.messages?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.expiration // Windows
       ?? (data.messages?.message?.extendedTextMessage?.contextInfo?.ephemeralSettingTimestamp as number|undefined) // Android
-    const result = await this.composition.provideSendMessageToClientUseCase().execute(whatsappId, recipientId, content, expiration)
+    const result = await this.composition.provideSendMessageToClientUseCase().execute(whatsappId, remoteUserId, content, expiration)
     await this.composition.provideReadReceivedMessageUseCase().execute(data.messages.key, whatsappId)
     await this.composition.provideUpdateEphemeralUseCase().execute(whatsappId, clientId, expiration ?? null)
     return result
@@ -241,6 +289,10 @@ export class WhatsappApiRouteController {
 
   private async getBestResponse(requestData: BotWebhookRequest): Promise<string> {
     return await this.composition.provideGetBestResponseUseCase().execute(requestData)
+  }
+
+  private async isSecretaryUser(sessionId: string): Promise<boolean> {
+    return await this.composition.provideIsSecretaryUserUseCase().execute(sessionId)
   }
 
   private async getBestResponseForAudio(
@@ -270,5 +322,22 @@ export class WhatsappApiRouteController {
 
   private isFromGroup(data: WebHookData): boolean  {
     return data.messages.key.participant === null;
+  }
+
+  private async hasUserSecretaryPermissions(remoteUserJid: string): Promise<boolean> {
+    return await this.composition.provideHasUserSecretaryPermissionsUseCase().execute(remoteUserJid)
+  }
+
+  private async sendResponseFromSecretary(
+    secretaryId: string,
+    userId: string,
+    data: WebHookData,
+    message: string,
+  ) : Promise<SendMessageResponseSchema> {
+    const remoteUserJid = data.messages.key.remoteJid
+    const expiration = data.messages?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.expiration // Windows
+      ?? (data.messages?.message?.extendedTextMessage?.contextInfo?.ephemeralSettingTimestamp as number|undefined) // Android
+    await this.composition.provideUpdateEphemeralUseCase().execute(secretaryId, userId, expiration ?? null)
+    return await this.composition.provideSendMessageToClientUseCase().execute(secretaryId, remoteUserJid, message, expiration)
   }
 }
