@@ -227,6 +227,8 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       ))
       .execute()
 
+    console.log('schedule job', resultJobId)
+
     if (!resultJobId.length) {
       return
     }
@@ -240,6 +242,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
 
     const result = await this.db.execute(sql.raw(this.getScheduleResetQuery(id, time)));
 
+    console.log('schedule job - result', result)
     if (!result) {
       throw new Error('Error scheduling task')
     }
