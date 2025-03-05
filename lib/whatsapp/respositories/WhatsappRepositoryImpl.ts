@@ -337,6 +337,6 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
     date = DateFormatter.addMonths(date, time.month || 0)
     date = new Date(DateFormatter.format(date, 'YYYY-MM-DDTHH:mm:ss', true))
 
-    return `${date.getMinutes()} ${date.getHours()} ${date.getDate()} ${date.getMonth() + 1} *`;
+    return `${date.getMinutes()} ${date.getHours()} ${date.getDate()} ${date.getMonth()} *`;
   }
 }
