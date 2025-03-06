@@ -4,19 +4,22 @@ import {HttpMethod} from "@/lib/common/models/HttpMethod";
 export class GetBestResponseFromSecretaryUseCase {
   constructor(private readonly repository: WhatsappRepository) {}
 
-  async execute(remoteUserJid: string): Promise<{message: string, userId: string}> {
+  async execute(remoteUserJid: string, message: string): Promise<{message: string, userId: string}> {
     const user = await this.repository.getUserFromWhatsappJid(remoteUserJid)
-    const businesses = await this.repository.getLocationsFromUser(user?.id ?? '')
 
     if (!user) {
       throw new Error('User not found')
     }
 
+    const business = await this.repository.getBusinessWithWhatsappsFromUser(user?.id ?? '')
+
     const url = process.env.BOT_SERVICE_URL || '';
 
     const body = {
       userId: user.id,
-      businesses: businesses,
+      businessId: business.id,
+      whatsappIds: business.whatsapps,
+      message,
     }
 
     const response = await fetch(`${url}/secretary`, {

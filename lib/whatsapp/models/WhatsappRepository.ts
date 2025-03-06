@@ -1,6 +1,7 @@
 import {ConversationStatus} from "@/lib/common/models/ConversationStatus";
 import {ScheduleTime} from "@/lib/common/models/ScheduleTime";
 import {User} from "@/lib/whatsapp/models/User";
+import {BusinessDto} from "@/lib/whatsapp/models/BusinessDto";
 
 export interface WhatsappRepository {
   /**
@@ -78,5 +79,5 @@ export interface WhatsappRepository {
 
   getUserFromWhatsappJid(remoteUserJid: string): Promise<User | null>;
 
-  getLocationsFromUser(userId: string): Promise<string[]>;
+  getBusinessWithWhatsappsFromUser(userId: string): Promise<BusinessDto>;
 }

@@ -113,17 +113,31 @@ export class WhatsappApiRouteController {
       }
     }
 
-    const {userId, message} = await this.composition.provideGetBestResponseFromSecretaryUseCase().execute(remoteUserJid)
+    const message = data.messages.message.ephemeralMessage?.message?.extendedTextMessage?.text ?? // Windows
+      data.messages?.message?.extendedTextMessage?.text ?? // Android
+      data.messages?.message?.conversation // Android message doesn't disappear.
 
-    if (message !== WAIT_FOR_RESPONSE) {
-      console.log('Sent message', await this.sendResponseFromSecretary(
-        secretaryId,
-        userId,
-        data,
-        message,
-      ))
+    if (message) {
+      const result = await this.composition
+        .provideGetBestResponseFromSecretaryUseCase()
+        .execute(remoteUserJid, message)
+
+      if (message !== WAIT_FOR_RESPONSE) {
+        console.log('Sent message', await this.sendResponseFromSecretary(
+          secretaryId,
+          result.userId,
+          data,
+          result.message,
+        ))
+      } else {
+        console.log(`Waiting for response from secretary ${secretaryId}`)
+      }
     } else {
-      console.log(`Waiting for response from secretary ${secretaryId}`)
+      console.log(`Invalid message received`)
+      return {
+        body: {message: ResponseMessage.InvalidMessage},
+        init: {status: HttpResponseCode.Accepted},
+      }
     }
 
     return {

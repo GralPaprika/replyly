@@ -18,6 +18,7 @@ import {users} from "@/db/schema/users";
 import {User} from "@/lib/whatsapp/models/User";
 import {businessUsersLocations} from "@/db/schema/businessUsersLocations";
 import {whatsappSecretaryConversation} from "@/db/schema/whatsappSecretaryConversation";
+import {BusinessDto} from "@/lib/whatsapp/models/BusinessDto";
 
 enum ErrorMessage {
   ConversationStatusNotFound = 'Conversation status not found',
@@ -314,15 +315,30 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
     return result.length > 0 ? result[0] : null
   }
 
-  async getLocationsFromUser(userId: string): Promise<string[]> {
-    return (await this.db
+  async getBusinessWithWhatsappsFromUser(userId: string): Promise<BusinessDto> {
+    const result = (await this.db
       .select({
-        locationId: businessUsersLocations.businessLocationId,
+        businessId: users.businessId,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .execute());
+
+    if (result.length === 0 || !result[0].businessId) {
+      throw new Error('Business not found');
+    }
+
+    const whatsapps = (await this.db
+      .select({
+        whatsappId: whatsapp.businessLocationId,
       })
       .from(businessUsersLocations)
+      .innerJoin(whatsapp, and(eq(whatsapp.businessLocationId, businessUsersLocations.businessLocationId), isFalse(whatsapp.deleted)))
       .where(and(eq(businessUsersLocations.businessUserId, userId), isFalse(businessUsersLocations.deleted)))
       .execute())
-      .map((location) => location.locationId)
+      .map((o) => o.whatsappId)
+
+    return { id: result[0].businessId, whatsapps }
   }
 
   private getScheduleResetQuery(id: string, time: ScheduleTime) {
