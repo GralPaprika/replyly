@@ -10,6 +10,7 @@ import {BotWebhookRequest} from "@/lib/whatsapp/models/botservice/BotWebhookRequ
 import {WAIT_FOR_RESPONSE} from "@/lib/whatsapp/models/const";
 import * as Path from "path";
 import * as fs from 'fs';
+import {BotSecretaryResponse} from "@/lib/whatsapp/models/botsecretary/BotSecretaryResponse";
 
 enum ResponseMessage {
   AlreadyDispatched = 'Already dispatched',
@@ -25,6 +26,8 @@ enum ResponseMessage {
 export class WhatsappApiRouteController {
   constructor(private readonly composition: WhatsappRouteComposition) {}
 
+  readonly audioDestinationPath = Path.resolve(__dirname, '..', '..', '..', '..', 'public', 'whatsapp', 'audio')
+
   async processMessage(
     whatsappId: string,
     data: WebHookData
@@ -37,7 +40,7 @@ export class WhatsappApiRouteController {
         }
       }
 
-      const remoteUserId = data.messages.key.remoteJid
+      const remoteUserId = this.getRemoteJid(data)
       if (await this.checkIfSenderIsBlackListed(whatsappId, remoteUserId)) {
         return {
           body: {message: ResponseMessage.Responded},
@@ -102,42 +105,42 @@ export class WhatsappApiRouteController {
   }
 
   private async secretaryRespondToBusiness(secretaryId: string, remoteUserJid: string, data: WebHookData): Promise<RouteResponse> {
-    const fromMe = data.messages.key.fromMe
-    const fromServer = data.messages.sentFromServer
-    const sync = data.messages.message.protocolMessage?.type === 'EPHEMERAL_SYNC_RESPONSE'
+    const {fromMe, syncUpdate} = this.getMessageSourceData(data)
 
-    if (sync || fromMe) {
+    if (syncUpdate || fromMe) {
       return {
         body: {message: ResponseMessage.Responded},
         init: {status: HttpResponseCode.Ok},
       }
     }
 
-    const message = data.messages.message.ephemeralMessage?.message?.extendedTextMessage?.text ?? // Windows
-      data.messages?.message?.extendedTextMessage?.text ?? // Android
-      data.messages?.message?.conversation // Android message doesn't disappear.
+    let result: BotSecretaryResponse;
+    const message = this.getMessage(data)
+    const audioMessage = this.getAudioMessage(data)
 
     if (message) {
-      const result = await this.composition
+      result = await this.composition
         .provideGetBestResponseFromSecretaryUseCase()
         .execute(remoteUserJid, message)
-
-      if (message !== WAIT_FOR_RESPONSE) {
-        console.log('Sent message', await this.sendResponseFromSecretary(
-          secretaryId,
-          result.userId,
-          data,
-          result.message,
-        ))
-      } else {
-        console.log(`Waiting for response from secretary ${secretaryId}`)
-      }
+    } else if (audioMessage) {
+      result = await this.getBestResponseFromSecretaryAudio(remoteUserJid, audioMessage)
     } else {
       console.log(`Invalid message received`)
       return {
         body: {message: ResponseMessage.InvalidMessage},
         init: {status: HttpResponseCode.Accepted},
       }
+    }
+
+    if (message !== WAIT_FOR_RESPONSE) {
+      console.log('Sent message from secretary', await this.sendResponseFromSecretary(
+        secretaryId,
+        result.userId,
+        data,
+        result.message,
+      ))
+    } else {
+      console.log(`Waiting for response from secretary ${secretaryId}`)
     }
 
     return {
@@ -188,12 +191,8 @@ export class WhatsappApiRouteController {
   ): Promise<RouteResponse> {
     await this.updateConversationStatus(conversationId, ConversationStatus.MessageReceived)
 
-    // TODO: Validate message format, if message null throw exception
-    const message = data.messages.message.ephemeralMessage?.message?.extendedTextMessage?.text ?? // Windows
-      data.messages?.message?.extendedTextMessage?.text ?? // Android
-      data.messages?.message?.conversation // Android message doesn't disappear.
-
-    const audioMessage = data.messages.message.audioMessage
+    const message = this.getMessage(data)
+    const audioMessage = this.getAudioMessage(data)
     const businessId = await this.composition.provideGetBusinessIdUseCase().execute(whatsappId)
 
     let response: string
@@ -243,6 +242,37 @@ export class WhatsappApiRouteController {
     }
   }
 
+  private getMessage(data: WebHookData): string | undefined {
+    return data.messages.message.ephemeralMessage?.message?.extendedTextMessage?.text ?? // Windows
+      data.messages?.message?.extendedTextMessage?.text ?? // Android
+      data.messages?.message?.conversation // Android message doesn't disappear.
+  }
+
+  private getAudioMessage(data: WebHookData): AudioMessage | undefined {
+    return data.messages.message.audioMessage
+  }
+
+  private getMessageExpiration(data: WebHookData): number | undefined {
+    return data.messages?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.expiration // Windows
+      ?? (data.messages?.message?.extendedTextMessage?.contextInfo?.ephemeralSettingTimestamp as number|undefined) // Android
+  }
+
+  private getRemoteJid(data: WebHookData): string {
+    return data.messages.key.remoteJid
+  }
+
+  private getMessageSourceData(data: WebHookData): {fromMe: boolean, fromServer: boolean, syncUpdate: boolean} {
+    return {
+      fromMe: data.messages.key.fromMe,
+      fromServer: data.messages.sentFromServer,
+      syncUpdate: data.messages.message.protocolMessage?.type === 'EPHEMERAL_SYNC_RESPONSE',
+    }
+  }
+
+  private isFromGroup(data: WebHookData): boolean  {
+    return data.messages.key.participant === null;
+  }
+
   private async getClientId(whatsappChatId: string): Promise<string> {
     return await this.composition.provideGetClientIdUseCase().execute(whatsappChatId)
   }
@@ -256,10 +286,7 @@ export class WhatsappApiRouteController {
   }
 
   private async getMessageSource(data: WebHookData): Promise<MessageSource> {
-    const fromMe = data.messages.key.fromMe
-    const fromServer = data.messages.sentFromServer
-    const syncUpdate = data.messages.message.protocolMessage?.type === 'EPHEMERAL_SYNC_RESPONSE'
-
+    const {fromMe, fromServer, syncUpdate} = this.getMessageSourceData(data)
     if (fromServer) return MessageSource.Bot
     if (fromMe && !syncUpdate) return MessageSource.BusinessUser
     return MessageSource.Client
@@ -283,9 +310,8 @@ export class WhatsappApiRouteController {
     data: WebHookData,
     content: string,
   ): Promise<SendMessageResponseSchema> {
-    const remoteUserId = data.messages.key.remoteJid
-    const expiration = data.messages?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.expiration // Windows
-      ?? (data.messages?.message?.extendedTextMessage?.contextInfo?.ephemeralSettingTimestamp as number|undefined) // Android
+    const remoteUserId = this.getRemoteJid(data)
+    const expiration = this.getMessageExpiration(data)
     const result = await this.composition.provideSendMessageToClientUseCase().execute(whatsappId, remoteUserId, content, expiration)
     await this.composition.provideReadReceivedMessageUseCase().execute(data.messages.key, whatsappId)
     await this.composition.provideUpdateEphemeralUseCase().execute(whatsappId, clientId, expiration ?? null)
@@ -317,25 +343,25 @@ export class WhatsappApiRouteController {
     whatsappId: string,
     businessId: string,
   ): Promise<string> {
-    const destinationPath = Path.resolve(__dirname, '..', '..', '..', '..', 'public', 'whatsapp', 'audio')
-
-    if (!fs.existsSync(destinationPath)) {
-      fs.mkdirSync(destinationPath, {recursive: true})
-    }
+    this.createPathIfNotExists(this.audioDestinationPath)
 
     return await this.composition.provideGetBestResponseForAudioUseCase().execute(
       conversationId,
       audioMessage,
       messageId,
-      destinationPath,
+      this.audioDestinationPath,
       chatId,
       whatsappId,
       businessId,
     )
   }
 
-  private isFromGroup(data: WebHookData): boolean  {
-    return data.messages.key.participant === null;
+  private async getBestResponseFromSecretaryAudio(
+    remoteUserId: string,
+    audioMessage: AudioMessage,
+  ): Promise<BotSecretaryResponse> {
+    this.createPathIfNotExists(this.audioDestinationPath)
+    return await this.composition.provideGetBestResponseFromSecretaryAudioUseCase().execute(remoteUserId, audioMessage, this.audioDestinationPath)
   }
 
   private async hasUserSecretaryPermissions(remoteUserJid: string): Promise<boolean> {
@@ -348,10 +374,15 @@ export class WhatsappApiRouteController {
     data: WebHookData,
     message: string,
   ) : Promise<SendMessageResponseSchema> {
-    const remoteUserJid = data.messages.key.remoteJid
-    const expiration = data.messages?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.expiration // Windows
-      ?? (data.messages?.message?.extendedTextMessage?.contextInfo?.ephemeralSettingTimestamp as number|undefined) // Android
+    const remoteUserJid = this.getRemoteJid(data)
+    const expiration = this.getMessageExpiration(data)
     await this.composition.provideUpdateEphemeralUseCase().execute(secretaryId, userId, expiration ?? null)
     return await this.composition.provideSendMessageToClientUseCase().execute(secretaryId, remoteUserJid, message, expiration)
+  }
+
+  private createPathIfNotExists(path: string): void {
+    if (!fs.existsSync(path)) {
+      fs.mkdirSync(path, {recursive: true})
+    }
   }
 }

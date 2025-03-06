@@ -1,10 +1,11 @@
 import {WhatsappRepository} from "@/lib/whatsapp/models/WhatsappRepository";
 import {HttpMethod} from "@/lib/common/models/HttpMethod";
+import {BotSecretaryResponse} from "@/lib/whatsapp/models/botsecretary/BotSecretaryResponse";
 
 export class GetBestResponseFromSecretaryUseCase {
   constructor(private readonly repository: WhatsappRepository) {}
 
-  async execute(remoteUserJid: string, message: string): Promise<{message: string, userId: string}> {
+  async execute(remoteUserJid: string, message: string): Promise<BotSecretaryResponse> {
     const user = await this.repository.getUserFromWhatsappJid(remoteUserJid)
 
     if (!user) {
