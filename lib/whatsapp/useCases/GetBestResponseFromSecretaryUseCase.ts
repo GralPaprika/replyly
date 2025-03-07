@@ -1,11 +1,12 @@
 import {WhatsappRepository} from "@/lib/whatsapp/models/WhatsappRepository";
 import {HttpMethod} from "@/lib/common/models/HttpMethod";
 import {BotSecretaryResponse} from "@/lib/whatsapp/models/botsecretary/BotSecretaryResponse";
+import {BotSecretaryTextRequest} from "@/lib/whatsapp/models/botsecretary/BotSecretaryTextRequest";
 
 export class GetBestResponseFromSecretaryUseCase {
   constructor(private readonly repository: WhatsappRepository) {}
 
-  async execute(remoteUserJid: string, message: string): Promise<BotSecretaryResponse> {
+  async execute(remoteUserJid: string, secretaryId: string, message: string): Promise<BotSecretaryResponse> {
     const user = await this.repository.getUserFromWhatsappJid(remoteUserJid)
 
     if (!user) {
@@ -16,8 +17,9 @@ export class GetBestResponseFromSecretaryUseCase {
 
     const url = process.env.BOT_SERVICE_URL || '';
 
-    const body = {
+    const body: BotSecretaryTextRequest = {
       userId: user.id,
+      secretaryId,
       businessId: business.id,
       whatsappIds: business.whatsapps,
       message,

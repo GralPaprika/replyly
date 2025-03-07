@@ -9,10 +9,14 @@ import {whatsapp} from "@/db/schema/whatsapp";
 import {businessLocations} from "@/db/schema/businessLocations";
 import {clients} from "@/db/schema/clients";
 import {ChatInfo} from "@/lib/notifications/models/ChatInfo";
+import {SecretaryConversation} from "@/lib/notifications/models/SecretaryConversation";
+import {users} from "@/db/schema/users";
+import {whatsappSecretaryConversation} from "@/db/schema/whatsappSecretaryConversation";
 
 const enum ErrorMessage {
   ErrorGettingChatInfo = 'Error getting chat info',
   BusinessPlanNotFound = 'Business plan not found',
+  UserWhatsappJidNotFound = 'User whatsapp jid not found',
 }
 
 export class NotificationRepositoryImpl implements NotificationRepository {
@@ -36,6 +40,35 @@ export class NotificationRepositoryImpl implements NotificationRepository {
       throw new RepositoryException(ErrorMessage.ErrorGettingChatInfo);
 
     return result[0];
+  }
+
+  async getSecretaryConversationInfo(secretaryId: string, userId: string): Promise<SecretaryConversation> {
+    const result = await this.db
+      .select({
+        businessId: users.businessId,
+        userWhatsappId: users.whatsappJid,
+        ephemeralExpiration: whatsappSecretaryConversation.ephemeralExpiration,
+      })
+      .from(whatsappSecretaryConversation)
+      .innerJoin(users, and(eq(users.id, whatsappSecretaryConversation.userId), isFalse(users.deleted)))
+      .where(and(
+        and(
+          eq(whatsappSecretaryConversation.userId, userId),
+          eq(whatsappSecretaryConversation.secretaryId, secretaryId)
+        ), isFalse(users.deleted)))
+      .execute()
+
+    if (result.length <= 0)
+      throw new RepositoryException(ErrorMessage.ErrorGettingChatInfo);
+
+    if (!result[0].userWhatsappId)
+      throw new RepositoryException(ErrorMessage.UserWhatsappJidNotFound)
+
+    return {
+      businessId: result[0].businessId as string,
+      userWhatsappId: result[0].userWhatsappId as string,
+      ephemeralExpiration: result[0].ephemeralExpiration,
+    }
   }
 
   async hasReminderNotification(businessId: string): Promise<boolean> {

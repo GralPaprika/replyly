@@ -10,5 +10,6 @@ export const users = pgTable('users', {
   phoneNumber: text('phone_number'),
   roleId: integer('role_id').notNull(),
   businessId: uuid('business_id').references(() => businesses.id),
+  whatsappJid: text('whatsapp_jid'),
   deleted: boolean('deleted').default(false).notNull(),
 })

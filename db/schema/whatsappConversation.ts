@@ -1,4 +1,4 @@
-import {boolean, integer, pgTable, text, uuid} from "drizzle-orm/pg-core";
+import {boolean, integer, pgTable, uuid} from "drizzle-orm/pg-core";
 import {whatsapp} from "@/db/schema/whatsapp";
 import {clients} from "@/db/schema/clients";
 

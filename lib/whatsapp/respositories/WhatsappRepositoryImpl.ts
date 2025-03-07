@@ -301,18 +301,42 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
   }
 
   async getUserFromWhatsappJid(remoteUserJid: string): Promise<User | null> {
+    let result;
 
-    const result = await this.db
+    result = await this.db
       .select({
         id: users.id,
         role: users.roleId,
         businessId: users.businessId,
       })
       .from(users)
-      .where(contains(users.phoneNumber, remoteUserJid))
+      .where(and(eq(users.whatsappJid, remoteUserJid), isFalse(users.deleted)))
       .execute()
 
-    return result.length > 0 ? result[0] : null
+    if (result.length > 0) {
+      return result[0];
+    }
+
+    result = await this.db
+      .select({
+        id: users.id,
+        role: users.roleId,
+        businessId: users.businessId,
+      })
+      .from(users)
+      .where(and(contains(users.phoneNumber, remoteUserJid), isFalse(users.deleted)))
+      .execute()
+
+    if (result.length > 0) {
+      const user = result[0]
+      await this.db.update(users)
+        .set({whatsappJid: remoteUserJid})
+        .where(eq(users.id, user.id))
+        .execute()
+      return user;
+    }
+
+    return null
   }
 
   async getBusinessWithWhatsappsFromUser(userId: string): Promise<BusinessDto> {

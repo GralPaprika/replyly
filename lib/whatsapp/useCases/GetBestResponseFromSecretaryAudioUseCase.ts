@@ -14,7 +14,7 @@ export class GetBestResponseFromSecretaryAudioUseCase {
     private readonly deleteDecodedFileUseCase: DeleteDecodedFileUseCase,
   ) {}
 
-  async execute(remoteUserJid: string, audioData: AudioMessage, destinationPath: string,): Promise<BotSecretaryResponse> {
+  async execute(remoteUserJid: string, secretaryId: string, audioData: AudioMessage, destinationPath: string,): Promise<BotSecretaryResponse> {
     const user = await this.repository.getUserFromWhatsappJid(remoteUserJid)
 
     if (!user) {
@@ -37,6 +37,7 @@ export class GetBestResponseFromSecretaryAudioUseCase {
 
     const body: BotSecretaryAudioRequest = {
       userId: user.id,
+      secretaryId,
       businessId: business.id,
       whatsappIds: business.whatsapps,
       voice: `${serverName}/api/public/whatsapp/audio/${audioFile}`,

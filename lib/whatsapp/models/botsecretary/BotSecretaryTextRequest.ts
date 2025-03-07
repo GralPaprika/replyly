@@ -1,7 +1,7 @@
-export interface BotSecretaryAudioRequest {
+export interface BotSecretaryTextRequest {
   userId: string;
   secretaryId: string;
   businessId: string;
   whatsappIds: string[];
-  voice: string;
+  message: string;
 }
