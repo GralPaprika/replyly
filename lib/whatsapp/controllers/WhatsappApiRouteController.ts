@@ -381,7 +381,7 @@ export class WhatsappApiRouteController {
   ) : Promise<SendMessageResponseSchema> {
     const remoteUserJid = this.getRemoteJid(data)
     const expiration = this.getMessageExpiration(data)
-    await this.composition.provideUpdateEphemeralUseCase().execute(secretaryId, userId, expiration ?? null)
+    await this.composition.provideUpdateEphemeralUseCase().execute(secretaryId, userId, expiration ?? null, true)
     return await this.composition.provideSendMessageToClientUseCase().execute(secretaryId, remoteUserJid, message, expiration)
   }
 
