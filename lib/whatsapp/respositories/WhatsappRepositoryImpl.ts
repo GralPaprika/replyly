@@ -297,7 +297,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       const result = await this.db
         .insert(whatsappSecretaryConversation)
         .values({secretaryId, userId, ephemeralExpiration: expiration})
-        .returning({ id: whatsappConversation.id })
+        .returning({ id: whatsappSecretaryConversation.id })
 
       if (result.length === 0) {
         throw new Error('Error updating ephemeral expiration')
@@ -305,7 +305,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
     }
 
     await this.db
-      .update(whatsappConversation)
+      .update(whatsappSecretaryConversation)
       .set({ephemeralExpiration: expiration})
       .where(eq(whatsappSecretaryConversation.id, conversation[0].id))
       .execute()
