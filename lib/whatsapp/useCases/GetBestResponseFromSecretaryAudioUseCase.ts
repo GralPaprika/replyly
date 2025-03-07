@@ -14,15 +14,8 @@ export class GetBestResponseFromSecretaryAudioUseCase {
     private readonly deleteDecodedFileUseCase: DeleteDecodedFileUseCase,
   ) {}
 
-  async execute(remoteUserJid: string, secretaryId: string, audioData: AudioMessage, destinationPath: string,): Promise<BotSecretaryResponse> {
-    const user = await this.repository.getUserFromWhatsappJid(remoteUserJid)
-
-    if (!user) {
-      throw new Error('User not found')
-    }
-
-    const business = await this.repository.getBusinessWithWhatsappsFromUser(user?.id ?? '')
-
+  async execute(userId: string, secretaryId: string, audioData: AudioMessage, destinationPath: string): Promise<BotSecretaryResponse> {
+    const business = await this.repository.getBusinessWithWhatsappsFromUser(userId)
     const url = process.env.BOT_SERVICE_URL || '';
     const serverName = process.env.SERVER_URL || '';
 
@@ -32,11 +25,11 @@ export class GetBestResponseFromSecretaryAudioUseCase {
       mimetype: audioData.mimetype,
       messageType: AudioType.type,
       whatsappTypeMessageToDecode: AudioType.whatsappTypeMessageToDecode,
-      filename: `${user.id}-${remoteUserJid}`
+      filename: `${userId}-${secretaryId}`
     }, destinationPath);
 
     const body: BotSecretaryAudioRequest = {
-      userId: user.id,
+      userId: userId,
       secretaryId,
       businessId: business.id,
       whatsappIds: business.whatsapps,
@@ -56,7 +49,7 @@ export class GetBestResponseFromSecretaryAudioUseCase {
     this.deleteDecodedFileUseCase.execute(`./public/whatsapp/audio/${audioFile}`);
 
     return {
-      userId: user.id,
+      userId: userId,
       message: await response.text(),
     }
   }

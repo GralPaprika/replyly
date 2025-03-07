@@ -11,6 +11,7 @@ import {WAIT_FOR_RESPONSE} from "@/lib/whatsapp/models/const";
 import * as Path from "path";
 import * as fs from 'fs';
 import {BotSecretaryResponse} from "@/lib/whatsapp/models/botsecretary/BotSecretaryResponse";
+import {User} from "@/lib/whatsapp/models/User";
 
 enum ResponseMessage {
   AlreadyDispatched = 'Already dispatched',
@@ -117,13 +118,14 @@ export class WhatsappApiRouteController {
     let result: BotSecretaryResponse;
     const message = this.getMessage(data)
     const audioMessage = this.getAudioMessage(data)
+    const user = await this.getUser(remoteUserJid)
 
     if (message) {
       result = await this.composition
         .provideGetBestResponseFromSecretaryUseCase()
-        .execute(remoteUserJid, secretaryId, message)
+        .execute(user.id, secretaryId, message)
     } else if (audioMessage) {
-      result = await this.getBestResponseFromSecretaryAudio(remoteUserJid, secretaryId, audioMessage)
+      result = await this.getBestResponseFromSecretaryAudio(user.id, secretaryId, audioMessage)
     } else {
       console.log(`Invalid message received`)
       return {
@@ -357,14 +359,14 @@ export class WhatsappApiRouteController {
   }
 
   private async getBestResponseFromSecretaryAudio(
-    remoteUserId: string,
+    userId: string,
     secretaryId: string,
     audioMessage: AudioMessage,
   ): Promise<BotSecretaryResponse> {
     this.createPathIfNotExists(this.audioDestinationPath)
     return await this.composition
       .provideGetBestResponseFromSecretaryAudioUseCase()
-      .execute(remoteUserId, secretaryId, audioMessage, this.audioDestinationPath)
+      .execute(userId, secretaryId, audioMessage, this.audioDestinationPath)
   }
 
   private async hasUserSecretaryPermissions(remoteUserJid: string): Promise<boolean> {
@@ -381,6 +383,10 @@ export class WhatsappApiRouteController {
     const expiration = this.getMessageExpiration(data)
     await this.composition.provideUpdateEphemeralUseCase().execute(secretaryId, userId, expiration ?? null)
     return await this.composition.provideSendMessageToClientUseCase().execute(secretaryId, remoteUserJid, message, expiration)
+  }
+
+  private async getUser(remoteUserJid: string): Promise<User> {
+    return await this.composition.provideGetUserUseCase().execute(remoteUserJid)
   }
 
   private createPathIfNotExists(path: string): void {

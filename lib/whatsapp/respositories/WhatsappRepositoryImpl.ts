@@ -286,10 +286,12 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
 
   async updateEphemeralExpirationSecretary(secretaryId: string, userId: string, expiration: number | null): Promise<void> {
     await this.db
-      .update(whatsappSecretaryConversation)
-      .set({ephemeralExpiration: expiration})
-      .where(and(and(eq(whatsappSecretaryConversation.secretaryId, secretaryId), eq(whatsappSecretaryConversation.userId, userId)), isFalse(whatsappSecretaryConversation.deleted)))
-      .execute()
+      .insert(whatsappSecretaryConversation)
+      .values({secretaryId, userId, ephemeralExpiration: expiration})
+      .onConflictDoUpdate({
+        target: [whatsappSecretaryConversation.secretaryId, whatsappSecretaryConversation.userId],
+        set: { ephemeralExpiration: expiration },
+      });
   }
 
   async isSecretaryUser(sessionId: string): Promise<boolean> {

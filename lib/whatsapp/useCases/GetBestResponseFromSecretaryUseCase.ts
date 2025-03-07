@@ -6,19 +6,13 @@ import {BotSecretaryTextRequest} from "@/lib/whatsapp/models/botsecretary/BotSec
 export class GetBestResponseFromSecretaryUseCase {
   constructor(private readonly repository: WhatsappRepository) {}
 
-  async execute(remoteUserJid: string, secretaryId: string, message: string): Promise<BotSecretaryResponse> {
-    const user = await this.repository.getUserFromWhatsappJid(remoteUserJid)
-
-    if (!user) {
-      throw new Error('User not found')
-    }
-
-    const business = await this.repository.getBusinessWithWhatsappsFromUser(user?.id ?? '')
+  async execute(userId: string, secretaryId: string, message: string): Promise<BotSecretaryResponse> {
+    const business = await this.repository.getBusinessWithWhatsappsFromUser(userId)
 
     const url = process.env.BOT_SERVICE_URL || '';
 
     const body: BotSecretaryTextRequest = {
-      userId: user.id,
+      userId,
       secretaryId,
       businessId: business.id,
       whatsappIds: business.whatsapps,
@@ -34,7 +28,7 @@ export class GetBestResponseFromSecretaryUseCase {
     });
 
     return {
-      userId: user.id,
+      userId,
       message: await response.text(),
     }
   }

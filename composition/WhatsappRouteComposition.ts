@@ -24,6 +24,7 @@ import {GetBestResponseFromSecretaryUseCase} from "@/lib/whatsapp/useCases/GetBe
 import {
   GetBestResponseFromSecretaryAudioUseCase
 } from "@/lib/whatsapp/useCases/GetBestResponseFromSecretaryAudioUseCase";
+import {GetUserIdUseCase} from "@/lib/whatsapp/useCases/GetUserIdUseCase";
 
 export class WhatsappRouteComposition {
   private readonly appCompositionRoot: AppComposition
@@ -48,6 +49,7 @@ export class WhatsappRouteComposition {
   private hasUserSecretaryPermissionsUseCase!: HasUserSecretaryPermissionsUseCase
   private getBestResponseFromSecretaryUseCase!: GetBestResponseFromSecretaryUseCase
   private getBestResponseFromSecretaryAudioUseCase!: GetBestResponseFromSecretaryAudioUseCase
+  private getUserIdUseCase!: GetUserIdUseCase
 
   constructor(appCompositionRoot: AppComposition) {
     this.appCompositionRoot = appCompositionRoot
@@ -158,5 +160,9 @@ export class WhatsappRouteComposition {
       this.provideGetDecodeMediaMessageUseCase(),
       this.provideGetDeleteDecodedFileUseCase()
     )
+  }
+
+  provideGetUserUseCase() {
+    return this.getUserIdUseCase ??= new GetUserIdUseCase(this.provideWhatsappRepository())
   }
 }
