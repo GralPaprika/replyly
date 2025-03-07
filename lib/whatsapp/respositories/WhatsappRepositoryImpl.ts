@@ -302,6 +302,8 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       if (result.length === 0) {
         throw new Error('Error updating ephemeral expiration')
       }
+
+      return
     }
 
     await this.db
