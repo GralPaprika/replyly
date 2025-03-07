@@ -285,13 +285,30 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
   }
 
   async updateEphemeralExpirationSecretary(secretaryId: string, userId: string, expiration: number | null): Promise<void> {
+    const conversation = await this.db.select({ id: whatsappSecretaryConversation.id })
+      .from(whatsappSecretaryConversation)
+      .where(and(
+        and(eq(whatsappSecretaryConversation.secretaryId, secretaryId), eq(whatsappSecretaryConversation.userId, userId)),
+        isFalse(whatsappSecretaryConversation.deleted)
+      ))
+      .execute()
+
+    if (conversation.length === 0) {
+      const result = await this.db
+        .insert(whatsappSecretaryConversation)
+        .values({secretaryId, userId, ephemeralExpiration: expiration})
+        .returning({ id: whatsappConversation.id })
+
+      if (result.length === 0) {
+        throw new Error('Error updating ephemeral expiration')
+      }
+    }
+
     await this.db
-      .insert(whatsappSecretaryConversation)
-      .values({secretaryId, userId, ephemeralExpiration: expiration})
-      .onConflictDoUpdate({
-        target: [whatsappSecretaryConversation.secretaryId, whatsappSecretaryConversation.userId],
-        set: { ephemeralExpiration: expiration },
-      });
+      .update(whatsappConversation)
+      .set({ephemeralExpiration: expiration})
+      .where(eq(whatsappSecretaryConversation.id, conversation[0].id))
+      .execute()
   }
 
   async isSecretaryUser(sessionId: string): Promise<boolean> {
