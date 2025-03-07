@@ -291,7 +291,8 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .onConflictDoUpdate({
         target: [whatsappSecretaryConversation.secretaryId, whatsappSecretaryConversation.userId],
         set: { ephemeralExpiration: expiration },
-      });
+      })
+      .execute();
   }
 
   async isSecretaryUser(sessionId: string): Promise<boolean> {
