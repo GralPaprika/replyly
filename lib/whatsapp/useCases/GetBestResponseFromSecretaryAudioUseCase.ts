@@ -5,19 +5,17 @@ import {WhatsappRepository} from "@/lib/whatsapp/models/WhatsappRepository";
 import {AudioType} from "@/lib/util/decode";
 import {AudioMessage} from "@/lib/whatsapp/models/webhook/MessageWebhookSchema";
 import {HttpMethod} from "@/lib/common/models/HttpMethod";
-import {DeleteDecodedFileUseCase} from "@/lib/whatsapp/useCases/DeleteDecodedFileUseCase";
+import * as Minio from "minio";
 
 export class GetBestResponseFromSecretaryAudioUseCase {
   constructor(
     private readonly repository: WhatsappRepository,
     private readonly decodeMediaMessageUseCase: DecodeMediaMessageUseCase,
-    private readonly deleteDecodedFileUseCase: DeleteDecodedFileUseCase,
+    private readonly minio: Minio.Client,
   ) {}
 
-  async execute(userId: string, secretaryId: string, audioData: AudioMessage, destinationPath: string): Promise<BotSecretaryResponse> {
+  async execute(userId: string, secretaryId: string, messageId: string, audioData: AudioMessage, destinationPath: string): Promise<BotSecretaryResponse> {
     const business = await this.repository.getBusinessWithWhatsappsFromUser(userId)
-    const url = process.env.BOT_SERVICE_URL || '';
-    const serverName = process.env.SERVER_URL || '';
 
     const audioFile = await this.decodeMediaMessageUseCase.execute({
       url: audioData.url,
@@ -28,15 +26,27 @@ export class GetBestResponseFromSecretaryAudioUseCase {
       filename: `${userId}-${secretaryId}`
     }, destinationPath);
 
+    const objectInfo = await this.minio.fPutObject(
+      process.env.MINIO_BUCKET || '',
+      messageId,
+      audioFile,
+      {'Content-Type': audioData.mimetype},
+    );
+
+    const url = await this.minio.presignedGetObject(
+      process.env.MINIO_BUCKET || '',
+      messageId,
+    );
+
     const body: BotSecretaryAudioRequest = {
       userId: userId,
       secretaryId,
       businessId: business.id,
       whatsappIds: business.whatsapps,
-      voice: `${serverName}/api/public/whatsapp/audio/${audioFile}`,
+      voice: url,
     }
 
-    const response = await fetch(`${url}/secretary`, {
+    const response = await fetch(`${process.env.BOT_SERVICE_URL || ''}/secretary`, {
       method: HttpMethod.POST,
       headers: {
         'Content-Type': 'application/json',
@@ -44,9 +54,7 @@ export class GetBestResponseFromSecretaryAudioUseCase {
       body: JSON.stringify(body)
     });
 
-    console.log('URL', `${serverName}/api/public/whatsapp/audio/${audioFile}`)
-
-    // this.deleteDecodedFileUseCase.execute(`./public/whatsapp/audio/${audioFile}`);
+    console.log('URL', url)
 
     return await response.json()
   }

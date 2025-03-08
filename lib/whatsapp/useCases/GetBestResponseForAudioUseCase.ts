@@ -2,13 +2,13 @@ import {HttpMethod} from "@/lib/common/models/HttpMethod";
 import {AudioMessage} from "@/lib/whatsapp/models/webhook/MessageWebhookSchema";
 import {DecodeMediaMessageUseCase} from "@/lib/whatsapp/useCases/DecodeMediaMessageUseCase";
 import {AudioType} from "@/lib/util/decode";
-import {DeleteDecodedFileUseCase} from "@/lib/whatsapp/useCases/DeleteDecodedFileUseCase";
 import {BotAudioWebhookRequest} from "@/lib/whatsapp/models/botservice/BotAudioWebhookRequest";
+import * as Minio from 'minio'
 
 export class GetBestResponseForAudioUseCase {
   constructor(
     private readonly decodeMediaMessageUseCase: DecodeMediaMessageUseCase,
-    private readonly deleteDecodedFileUseCase: DeleteDecodedFileUseCase,
+    private readonly minio: Minio.Client,
   ) {}
 
   async execute(
@@ -29,13 +29,23 @@ export class GetBestResponseForAudioUseCase {
       filename: `${conversationId}-${messageId}`
     }, destinationPath);
 
-    const serverName = process.env.SERVER_URL || '';
+    const objectInfo = await this.minio.fPutObject(
+      process.env.MINIO_BUCKET || '',
+      messageId,
+      audioFile,
+      {'Content-Type': audioData.mimetype},
+    );
+
+    const url = await this.minio.presignedGetObject(
+      process.env.MINIO_BUCKET || '',
+      messageId,
+    );
 
     const body: BotAudioWebhookRequest = {
       businessId,
       chatId,
       whatsappId,
-      voice: `${serverName}/api/public/whatsapp/audio/${audioFile}`
+      voice: url
     }
 
     const response = await fetch(process.env.BOT_SERVICE_URL || '', {
@@ -46,9 +56,7 @@ export class GetBestResponseForAudioUseCase {
       body: JSON.stringify(body)
     });
 
-    console.log('URL', `${serverName}/api/public/whatsapp/audio/${audioFile}`)
-
-    // this.deleteDecodedFileUseCase.execute(`./public/whatsapp/audio/${audioFile}`);
+    console.log('URL', url)
 
     return await response.text()
   }

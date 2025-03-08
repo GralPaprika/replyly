@@ -119,13 +119,14 @@ export class WhatsappApiRouteController {
     const message = this.getMessage(data)
     const audioMessage = this.getAudioMessage(data)
     const user = await this.getUser(remoteUserJid)
+    const messageId = data.messages.key.id
 
     if (message) {
       result = await this.composition
         .provideGetBestResponseFromSecretaryUseCase()
         .execute(user.id, secretaryId, message)
     } else if (audioMessage) {
-      result = await this.getBestResponseFromSecretaryAudio(user.id, secretaryId, audioMessage)
+      result = await this.getBestResponseFromSecretaryAudio(user.id, secretaryId, messageId, audioMessage)
     } else {
       console.log(`Invalid message received`)
       return {
@@ -361,12 +362,13 @@ export class WhatsappApiRouteController {
   private async getBestResponseFromSecretaryAudio(
     userId: string,
     secretaryId: string,
+    messageId: string,
     audioMessage: AudioMessage,
   ): Promise<BotSecretaryResponse> {
     this.createPathIfNotExists(this.audioDestinationPath)
     return await this.composition
       .provideGetBestResponseFromSecretaryAudioUseCase()
-      .execute(userId, secretaryId, audioMessage, this.audioDestinationPath)
+      .execute(userId, secretaryId, messageId, audioMessage, this.audioDestinationPath)
   }
 
   private async hasUserSecretaryPermissions(remoteUserJid: string): Promise<boolean> {

@@ -14,7 +14,6 @@ import {GetBestResponseUseCase} from "@/lib/whatsapp/useCases/GetBestResponseUse
 import {GetBestResponseForAudioUseCase} from "@/lib/whatsapp/useCases/GetBestResponseForAudioUseCase";
 import {GetClientIdUseCase} from "@/lib/whatsapp/useCases/GetClientIdUseCase";
 import {DecodeMediaMessageUseCase} from "@/lib/whatsapp/useCases/DecodeMediaMessageUseCase";
-import {DeleteDecodedFileUseCase} from "@/lib/whatsapp/useCases/DeleteDecodedFileUseCase";
 import {ReadReceivedMessageUseCase} from "@/lib/whatsapp/useCases/ReadReceivedMessageUseCase";
 import {GetBusinessIdUseCase} from "@/lib/whatsapp/useCases/GetBusinessIdUseCase";
 import {UpdateEphemeralUseCase} from "@/lib/whatsapp/useCases/UpdateEphemeralUseCase";
@@ -25,6 +24,7 @@ import {
   GetBestResponseFromSecretaryAudioUseCase
 } from "@/lib/whatsapp/useCases/GetBestResponseFromSecretaryAudioUseCase";
 import {GetUserIdUseCase} from "@/lib/whatsapp/useCases/GetUserIdUseCase";
+import * as Minio from 'minio'
 
 export class WhatsappRouteComposition {
   private readonly appCompositionRoot: AppComposition
@@ -40,7 +40,6 @@ export class WhatsappRouteComposition {
   private getBestResponseUseCase!: GetBestResponseUseCase
   private getBestResponseForAudioUseCase!: GetBestResponseForAudioUseCase
   private getDecodeMediaMessageUseCase!: DecodeMediaMessageUseCase
-  private getDeleteDecodedFileUseCase!: DeleteDecodedFileUseCase
   private getClientIdUseCase!: GetClientIdUseCase
   private readReceivedMessageUseCase!: ReadReceivedMessageUseCase
   private getBusinessIdUseCase!: GetBusinessIdUseCase
@@ -50,6 +49,7 @@ export class WhatsappRouteComposition {
   private getBestResponseFromSecretaryUseCase!: GetBestResponseFromSecretaryUseCase
   private getBestResponseFromSecretaryAudioUseCase!: GetBestResponseFromSecretaryAudioUseCase
   private getUserIdUseCase!: GetUserIdUseCase
+  private minioClient!: Minio.Client
 
   constructor(appCompositionRoot: AppComposition) {
     this.appCompositionRoot = appCompositionRoot
@@ -61,6 +61,16 @@ export class WhatsappRouteComposition {
 
   private provideWhatsappRepository(): WhatsappRepository {
     return this.whatsappRepository ??= new WhatsappRepositoryImpl(this.appCompositionRoot.getDatabase())
+  }
+
+  private provideMinioClient(): Minio.Client {
+    return this.minioClient ??= new Minio.Client({
+      endPoint: process.env.MINIO_ENDPOINT || '',
+      port: parseInt(process.env.MINIO_PORT || ''),
+      useSSL: process.env.MINIO_USE_SSL === 'true',
+      accessKey: process.env.MINIO_ACCESS_KEY || '',
+      secretKey: process.env.MINIO_SECRET_KEY || ''
+    })
   }
 
   private provideDeactivatePlanUseCase(): DeactivatePlanUseCase {
@@ -113,14 +123,10 @@ export class WhatsappRouteComposition {
     return this.getDecodeMediaMessageUseCase ??= new DecodeMediaMessageUseCase()
   }
 
-  provideGetDeleteDecodedFileUseCase() {
-    return this.getDeleteDecodedFileUseCase ??= new DeleteDecodedFileUseCase()
-  }
-
   provideGetBestResponseForAudioUseCase() {
     return this.getBestResponseForAudioUseCase ??= new GetBestResponseForAudioUseCase(
       this.provideGetDecodeMediaMessageUseCase(),
-      this.provideGetDeleteDecodedFileUseCase()
+      this.provideMinioClient(),
     )
   }
 
@@ -158,7 +164,7 @@ export class WhatsappRouteComposition {
     return this.getBestResponseFromSecretaryAudioUseCase ??= new GetBestResponseFromSecretaryAudioUseCase(
       this.provideWhatsappRepository(),
       this.provideGetDecodeMediaMessageUseCase(),
-      this.provideGetDeleteDecodedFileUseCase()
+      this.provideMinioClient(),
     )
   }
 
