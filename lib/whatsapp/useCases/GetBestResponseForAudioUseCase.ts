@@ -4,6 +4,7 @@ import {DecodeMediaMessageUseCase} from "@/lib/whatsapp/useCases/DecodeMediaMess
 import {AudioType} from "@/lib/util/decode";
 import {BotAudioWebhookRequest} from "@/lib/whatsapp/models/botservice/BotAudioWebhookRequest";
 import * as Minio from 'minio'
+import Path from "path";
 
 export class GetBestResponseForAudioUseCase {
   constructor(
@@ -29,10 +30,12 @@ export class GetBestResponseForAudioUseCase {
       filename: `${conversationId}-${messageId}`
     }, destinationPath);
 
+    const path = Path.join(destinationPath, audioFile);
+
     const objectInfo = await this.minio.fPutObject(
       process.env.MINIO_BUCKET || '',
       messageId,
-      audioFile,
+      path,
       {'Content-Type': audioData.mimetype},
     );
 

@@ -87,6 +87,7 @@ export class WhatsappApiRouteController {
       return await this.respondToClient(whatsappId, conversationId, clientId, data);
 
     } catch (exception) {
+      console.error(exception)
       if (exception instanceof HasActivePlanException) {
         const httpCode = exception.code !== HasActivePlanException.ErrorCode.SystemError ?
           HttpResponseCode.NotFound : HttpResponseCode.ServerError
