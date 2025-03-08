@@ -46,7 +46,7 @@ export class GetBestResponseFromSecretaryAudioUseCase {
 
     console.log('URL', `${serverName}/api/public/whatsapp/audio/${audioFile}`)
 
-    this.deleteDecodedFileUseCase.execute(`./public/whatsapp/audio/${audioFile}`);
+    // this.deleteDecodedFileUseCase.execute(`./public/whatsapp/audio/${audioFile}`);
 
     return {
       userId: userId,

@@ -48,7 +48,7 @@ export class GetBestResponseForAudioUseCase {
 
     console.log('URL', `${serverName}/api/public/whatsapp/audio/${audioFile}`)
 
-    this.deleteDecodedFileUseCase.execute(`./public/whatsapp/audio/${audioFile}`);
+    // this.deleteDecodedFileUseCase.execute(`./public/whatsapp/audio/${audioFile}`);
 
     return await response.text()
   }
