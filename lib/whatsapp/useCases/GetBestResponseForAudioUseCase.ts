@@ -30,25 +30,13 @@ export class GetBestResponseForAudioUseCase {
       filename: `${conversationId}-${messageId}`
     }, destinationPath);
 
-    const path = Path.join(destinationPath, audioFile);
-
-    const objectInfo = await this.minio.fPutObject(
-      process.env.MINIO_BUCKET || '',
-      messageId,
-      path,
-      {'Content-Type': audioData.mimetype},
-    );
-
-    const url = await this.minio.presignedGetObject(
-      process.env.MINIO_BUCKET || '',
-      messageId,
-    );
+    const serverName = process.env.SERVER_URL || '';
 
     const body: BotAudioWebhookRequest = {
       businessId,
       chatId,
       whatsappId,
-      voice: url
+      voice: `${serverName}/api/public/whatsapp/audio/${audioFile}`
     }
 
     const response = await fetch(process.env.BOT_SERVICE_URL || '', {
@@ -59,7 +47,7 @@ export class GetBestResponseForAudioUseCase {
       body: JSON.stringify(body)
     });
 
-    console.log('URL', url)
+    console.log('URL', `${serverName}/api/public/whatsapp/audio/${audioFile}`)
 
     return await response.text()
   }
