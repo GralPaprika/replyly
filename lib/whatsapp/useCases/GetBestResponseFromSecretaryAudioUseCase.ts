@@ -48,9 +48,6 @@ export class GetBestResponseFromSecretaryAudioUseCase {
 
     // this.deleteDecodedFileUseCase.execute(`./public/whatsapp/audio/${audioFile}`);
 
-    return {
-      userId: userId,
-      message: await response.text(),
-    }
+    return await response.json()
   }
 }

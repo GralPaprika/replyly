@@ -27,9 +27,6 @@ export class GetBestResponseFromSecretaryUseCase {
       body: JSON.stringify(body)
     });
 
-    return {
-      userId,
-      message: await response.text(),
-    }
+    return await response.json()
   }
 }
