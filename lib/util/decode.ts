@@ -46,11 +46,17 @@ export async function downloadUsingEncLink(payload: Payload, destinationPath: st
 
   const mediaKeyExpanded = HKDF(Buffer.from(mediaKey, 'base64'), 112, Buffer.from(whatsappTypeMessageToDecode, 'utf-8'));
   const mediaData = fs.readFileSync(encFilePath);
-  const file = mediaData.slice(0, -10);
-  const fileDataDecoded = AESDecrypt(mediaKeyExpanded.slice(16, 48), file, mediaKeyExpanded.slice(0, 16));
+  let file = mediaData.slice(0, -10);
+  if (file.length % 16 !== 0) {
+    const paddingLength = 16 - (file.length % 16);
+    const padding = Buffer.alloc(paddingLength, paddingLength);
+    file = Buffer.concat([file, padding]);
+  }
+
+  const decryptedData = AESDecrypt(mediaKeyExpanded.slice(16, 48), file, mediaKeyExpanded.slice(0, 16));
 
   const decodedFilePath = Path.join(destinationPath, completeFilename);
-  fs.writeFileSync(decodedFilePath, fileDataDecoded);
+  fs.writeFileSync(decodedFilePath, decryptedData);
 
   return completeFilename;
 }
@@ -75,6 +81,7 @@ function AESUnpad(buffer: Buffer): Buffer {
 
 function AESDecrypt(key: Buffer, ciphertext: Buffer, iv: Buffer): Buffer {
   const decipher = crypto.createDecipheriv(AES_DECRYPT_ALGORITHM, key, iv);
+  decipher.setAutoPadding(false);
   const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
   return AESUnpad(decrypted);
 }
