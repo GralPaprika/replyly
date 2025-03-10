@@ -37,7 +37,7 @@ export default function PhoneSearchForm() {
   // Validate phone number format
   const isValidPhoneNumber = (number: string) => {
     // Basic validation - can be enhanced based on your requirements
-    return /^\d{10}$|^\d{3}-\d{3}-\d{4}$/.test(number)
+    return /^\d{9,10}$/.test(number)
   }
 
   // Handle phone number search
