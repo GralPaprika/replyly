@@ -2,15 +2,14 @@ import {AppComposition} from "@/composition/AppComposition";
 import {BusinessRepository} from "@/lib/business/models/BusinessRepository";
 import {BusinessRepositoryImpl} from "@/lib/business/repositories/BusinessRepositoryImpl";
 import {CreateBusinessUseCase} from "@/lib/business/usecases/CreateBusinessUseCase";
+import {GetAllBusinessesUseCase} from "@/lib/business/usecases/GetAllBusinessesUseCase";
 
 export class BusinessRouteComposition {
-  private readonly appCompositionRoot: AppComposition
   private businessRepository!: BusinessRepository
   private createBusinessUseCase!: CreateBusinessUseCase
+  private getAllBusinessUseCase!: GetAllBusinessesUseCase
 
-  constructor(appCompositionRoot: AppComposition) {
-    this.appCompositionRoot = appCompositionRoot
-  }
+  private constructor(private readonly appCompositionRoot: AppComposition) {}
 
   static provideInstance(): BusinessRouteComposition {
     return new BusinessRouteComposition(AppComposition.getInstance())
@@ -22,5 +21,9 @@ export class BusinessRouteComposition {
 
   provideCreateBusinessUseCase(): CreateBusinessUseCase {
     return this.createBusinessUseCase ??= new CreateBusinessUseCase(this.provideBusinessRepository())
+  }
+
+  provideGetAllBusinessesUseCase(): GetAllBusinessesUseCase {
+    return this.getAllBusinessUseCase ??= new GetAllBusinessesUseCase(this.provideBusinessRepository())
   }
 }

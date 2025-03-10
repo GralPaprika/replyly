@@ -14,6 +14,7 @@ import { network } from "@/db/schema/network";
 import {businessUsersLocations} from "@/db/schema/businessUsersLocations";
 import {isFalse} from "@/lib/common/helpers/DatabaseFunctions";
 import {whatsapp} from "@/db/schema/whatsapp";
+import {SlimBusinessDto} from "@/lib/business/models/SlimBusinessDto";
 
 export class BusinessRepositoryImpl implements BusinessRepository {
   constructor(private readonly db: PostgresJsDatabase) {}
@@ -93,5 +94,13 @@ export class BusinessRepositoryImpl implements BusinessRepository {
       .execute()
 
     return result[0].id
+  }
+
+  async getAll(): Promise<SlimBusinessDto[]> {
+    return await this.db
+      .select({id: businesses.id, name: businesses.businessName})
+      .from(businesses)
+      .where(isFalse(businesses.deleted))
+      .execute()
   }
 }
