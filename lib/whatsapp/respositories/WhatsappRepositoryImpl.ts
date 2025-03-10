@@ -235,13 +235,17 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
     }
 
     if (resultJobId[0].scheduledResetId !== null) {
-      const result = await this.db.execute(sql.raw(`SELECT cron.unschedule('${resultJobId[0].scheduledResetId}')`))
+      const query = `SELECT cron.unschedule('${resultJobId[0].scheduledResetId}')`
+      console.log(query)
+      const result = await this.db.execute(sql.raw(query))
       if (!result || !result[0]['unschedule']) {
         throw new Error('Error unscheduling task')
       }
     }
 
-    const result = await this.db.execute(sql.raw(this.getScheduleResetQuery(id, time)));
+    const querySchedule = this.getScheduleResetQuery(id, time)
+    console.log('querySchedule', querySchedule)
+    const result = await this.db.execute(sql.raw(querySchedule));
 
     console.log('schedule job - result', result)
     if (!result) {
@@ -388,7 +392,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
 
   private getScheduleResetQuery(id: string, time: ScheduleTime) {
     return `SELECT cron.schedule('${id}', '${this.dateForCron(time)}', $$
-      UPDATE public.whatsapp_conversation SET conversation_status = 0, scheduled_reset_id = null WHERE id = '${id}'; SELECT cron.unschedule('${id}') FROM cron.job;
+      UPDATE public.whatsapp_conversation SET conversation_status = 0, scheduled_reset_id = null WHERE id = '${id}'; SELECT cron.unschedule('${id}');
     $$);`
   }
 
