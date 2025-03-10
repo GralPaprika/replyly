@@ -228,26 +228,19 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       ))
       .execute()
 
-    console.log('schedule job', resultJobId)
-
     if (!resultJobId.length) {
       return
     }
 
     if (resultJobId[0].scheduledResetId !== null) {
-      const query = `SELECT cron.unschedule('${resultJobId[0].scheduledResetId}')`
-      console.log(query)
-      const result = await this.db.execute(sql.raw(query))
+      const result = await this.db.execute(sql.raw(`SELECT cron.unschedule('${resultJobId[0].scheduledResetId}')`))
       if (!result || !result[0]['unschedule']) {
         throw new Error('Error unscheduling task')
       }
     }
 
-    const querySchedule = this.getScheduleResetQuery(id, time)
-    console.log('querySchedule', querySchedule)
-    const result = await this.db.execute(sql.raw(querySchedule));
+    const result = await this.db.execute(sql.raw(this.getScheduleResetQuery(id, time)));
 
-    console.log('schedule job - result', result)
     if (!result) {
       throw new Error('Error scheduling task')
     }
