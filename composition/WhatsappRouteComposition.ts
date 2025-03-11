@@ -25,8 +25,8 @@ import {
 } from "@/lib/whatsapp/useCases/GetBestResponseFromSecretaryAudioUseCase";
 import {GetUserIdUseCase} from "@/lib/whatsapp/useCases/GetUserIdUseCase";
 import * as Minio from 'minio'
-import {GetWhatsappCountryCode} from "@/lib/whatsapp/useCases/GetWhatsappCountryCode";
-import {GetSecretaryCountryCode} from "@/lib/whatsapp/useCases/GetSecretaryCountryCode";
+import {GetWhatsappPhoneNumber} from "@/lib/whatsapp/useCases/GetWhatsappPhoneNumber";
+import {GetSecretaryPhoneNumber} from "@/lib/whatsapp/useCases/GetSecretaryPhoneNumber";
 
 export class WhatsappRouteComposition {
   private readonly appCompositionRoot: AppComposition
@@ -43,8 +43,8 @@ export class WhatsappRouteComposition {
   private getBestResponseForAudioUseCase!: GetBestResponseForAudioUseCase
   private getDecodeMediaMessageUseCase!: DecodeMediaMessageUseCase
   private getClientIdUseCase!: GetClientIdUseCase
-  private getWhatsappCountryCodeUseCase!: GetWhatsappCountryCode
-  private getSecretaryCountryCodeUseCase!: GetSecretaryCountryCode
+  private getWhatsappPhoneNumberUseCase!: GetWhatsappPhoneNumber
+  private getSecretaryPhoneNumberUseCase!: GetSecretaryPhoneNumber
   private readReceivedMessageUseCase!: ReadReceivedMessageUseCase
   private getBusinessIdUseCase!: GetBusinessIdUseCase
   private updateEphemeralUseCase!: UpdateEphemeralUseCase
@@ -137,12 +137,12 @@ export class WhatsappRouteComposition {
     return this.getClientIdUseCase ??= new GetClientIdUseCase(this.provideWhatsappRepository())
   }
 
-  provideGetWhatsappCountryCodeUseCase() {
-    return this.getWhatsappCountryCodeUseCase ??= new GetWhatsappCountryCode(this.provideWhatsappRepository())
+  provideGetWhatsappPhoneNumberUseCase() {
+    return this.getWhatsappPhoneNumberUseCase ??= new GetWhatsappPhoneNumber(this.provideWhatsappRepository())
   }
 
-  provideGetSecretaryCountryCodeUseCase() {
-    return this.getSecretaryCountryCodeUseCase ??= new GetSecretaryCountryCode(this.provideWhatsappRepository())
+  provideGetSecretaryPhoneNumberUseCase() {
+    return this.getSecretaryPhoneNumberUseCase ??= new GetSecretaryPhoneNumber(this.provideWhatsappRepository())
   }
 
   provideReadReceivedMessageUseCase() {

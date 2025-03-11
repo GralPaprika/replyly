@@ -69,7 +69,7 @@ export class WhatsappApiRouteController {
       const clientId = await this.getClientId(remoteUserId)
       const source = await this.getMessageSource(data)
       const conversationId = await this.getConversationId(whatsappId, clientId)
-      const whatsappCountryCode = await this.getWhatsappCountryCode(whatsappId)
+      const whatsappPhoneNumber = await this.getWhatsappPhoneNumber(whatsappId)
 
       if (source === MessageSource.Bot)
         return {
@@ -85,7 +85,7 @@ export class WhatsappApiRouteController {
         }
       }
 
-      return await this.respondToClient(whatsappId, conversationId, clientId, whatsappCountryCode, data);
+      return await this.respondToClient(whatsappId, conversationId, clientId, whatsappPhoneNumber, data);
 
     } catch (exception) {
       console.error(exception)
@@ -109,7 +109,7 @@ export class WhatsappApiRouteController {
 
   private async secretaryRespondToBusiness(secretaryId: string, remoteUserJid: string, data: WebHookData): Promise<RouteResponse> {
     const {fromMe, syncUpdate} = this.getMessageSourceData(data)
-    const secretaryCountryCode = await this.getSecretaryCountryCode(secretaryId)
+    const secretaryPhoneNumber = await this.getSecretaryPhoneNumber(secretaryId)
 
     if (syncUpdate || fromMe) {
       return {
@@ -127,9 +127,9 @@ export class WhatsappApiRouteController {
     if (message) {
       result = await this.composition
         .provideGetBestResponseFromSecretaryUseCase()
-        .execute(user.id, secretaryId, secretaryCountryCode, message)
+        .execute(user.id, secretaryId, secretaryPhoneNumber, message)
     } else if (audioMessage) {
-      result = await this.getBestResponseFromSecretaryAudio(user.id, secretaryId, messageId, secretaryCountryCode, audioMessage)
+      result = await this.getBestResponseFromSecretaryAudio(user.id, secretaryId, messageId, secretaryPhoneNumber, audioMessage)
     } else {
       console.log(`Invalid message received`)
       return {
@@ -303,12 +303,12 @@ export class WhatsappApiRouteController {
     return MessageSource.Client
   }
 
-  private async getWhatsappCountryCode(whatsappId: string): Promise<string> {
-    return await this.composition.provideGetWhatsappCountryCodeUseCase().execute(whatsappId)
+  private async getWhatsappPhoneNumber(whatsappId: string): Promise<string> {
+    return await this.composition.provideGetWhatsappPhoneNumberUseCase().execute(whatsappId)
   }
 
-  private async getSecretaryCountryCode(secretaryId: string): Promise<string> {
-    return await this.composition.provideGetSecretaryCountryCodeUseCase().execute(secretaryId)
+  private async getSecretaryPhoneNumber(secretaryId: string): Promise<string> {
+    return await this.composition.provideGetSecretaryPhoneNumberUseCase().execute(secretaryId)
   }
 
   private async hasActivePlan(whatsappId: string): Promise<boolean> {

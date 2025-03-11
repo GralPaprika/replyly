@@ -1,0 +1,1 @@
+ALTER TABLE "secretaries" ADD COLUMN "phone_number" text;

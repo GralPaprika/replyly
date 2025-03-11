@@ -153,9 +153,9 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
     return result.length > 0 ? result[0].conversationId : null
   }
 
-  async getWhatsappCountryCode(whatsappId: string): Promise<string> {
+  async getWhatsappPhoneNumber(whatsappId: string): Promise<string> {
     const result = await this.db
-      .select({countryCode: whatsapp.countryCode})
+      .select({countryCode: whatsapp.countryCode, phoneNumber: whatsapp.phoneNumber})
       .from(whatsapp)
       .where(and(eq(whatsapp.id, whatsappId), isFalse(whatsapp.deleted)))
       .execute()
@@ -164,7 +164,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       throw new Error('Whatsapp not found')
     }
 
-    return result[0].countryCode ?? ''
+    return (result[0].countryCode ?? '') + (result[0].phoneNumber ?? '')
   }
 
   async getBusinessHours(whatsappId: string): Promise<object> {
@@ -332,9 +332,9 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .execute()).length === 1
   }
 
-  async getSecretaryCountryCode(secretaryId: string): Promise<string> {
+  async getSecretaryPhoneNumber(secretaryId: string): Promise<string> {
     const result = await this.db
-      .select({countryCode: secretaries.countryCode})
+      .select({countryCode: secretaries.countryCode, phoneNumber: secretaries.phoneNumber})
       .from(secretaries)
       .where(and(eq(secretaries.id, secretaryId), isFalse(secretaries.deleted)))
       .execute()
@@ -343,7 +343,7 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       throw new Error('Whatsapp not found')
     }
 
-    return result[0].countryCode ?? ''
+    return (result[0].countryCode ?? '') + (result[0].phoneNumber ?? '')
   }
 
   async getUserFromWhatsappJid(remoteUserJid: string): Promise<User | null> {

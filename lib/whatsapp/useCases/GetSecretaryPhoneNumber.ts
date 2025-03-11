@@ -1,9 +1,9 @@
 import {WhatsappRepository} from "@/lib/whatsapp/models/WhatsappRepository";
 
-export class GetSecretaryCountryCode {
+export class GetSecretaryPhoneNumber {
   constructor(private readonly repository: WhatsappRepository) {}
 
   async execute(secretaryId: string): Promise<string> {
-    return await this.repository.getSecretaryCountryCode(secretaryId)
+    return await this.repository.getSecretaryPhoneNumber(secretaryId)
   }
 }
