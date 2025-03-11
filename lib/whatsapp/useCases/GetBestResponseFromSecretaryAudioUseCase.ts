@@ -15,7 +15,7 @@ export class GetBestResponseFromSecretaryAudioUseCase {
     private readonly minio: Minio.Client,
   ) {}
 
-  async execute(userId: string, secretaryId: string, messageId: string, audioData: AudioMessage, destinationPath: string): Promise<BotSecretaryResponse> {
+  async execute(userId: string, secretaryId: string, countryCode: string, audioData: AudioMessage, destinationPath: string): Promise<BotSecretaryResponse> {
     const business = await this.repository.getBusinessWithWhatsappsFromUser(userId)
     const url = process.env.BOT_SERVICE_URL || '';
     const serverName = process.env.SERVER_URL || '';
@@ -34,6 +34,7 @@ export class GetBestResponseFromSecretaryAudioUseCase {
       secretaryId,
       businessId: business.id,
       whatsappIds: business.whatsapps,
+      countryCode,
       voice: `${serverName}/api/public/whatsapp/audio/${audioFile}`,
     }
 

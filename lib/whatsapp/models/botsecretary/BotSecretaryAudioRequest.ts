@@ -3,5 +3,6 @@ export interface BotSecretaryAudioRequest {
   secretaryId: string;
   businessId: string;
   whatsappIds: string[];
+  countryCode: string;
   voice: string;
 }

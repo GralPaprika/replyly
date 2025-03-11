@@ -153,6 +153,20 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
     return result.length > 0 ? result[0].conversationId : null
   }
 
+  async getWhatsappCountryCode(whatsappId: string): Promise<string> {
+    const result = await this.db
+      .select({countryCode: whatsapp.countryCode})
+      .from(whatsapp)
+      .where(and(eq(whatsapp.id, whatsappId), isFalse(whatsapp.deleted)))
+      .execute()
+
+    if (result.length === 0) {
+      throw new Error('Whatsapp not found')
+    }
+
+    return result[0].countryCode ?? ''
+  }
+
   async getBusinessHours(whatsappId: string): Promise<object> {
     return await this.db
       .select({
@@ -316,6 +330,20 @@ export class WhatsappRepositoryImpl implements WhatsappRepository {
       .from(secretaries)
       .where(and(eq(secretaries.id, sessionId), isFalse(secretaries.deleted)))
       .execute()).length === 1
+  }
+
+  async getSecretaryCountryCode(secretaryId: string): Promise<string> {
+    const result = await this.db
+      .select({countryCode: secretaries.countryCode})
+      .from(secretaries)
+      .where(and(eq(secretaries.id, secretaryId), isFalse(secretaries.deleted)))
+      .execute()
+
+    if (result.length === 0) {
+      throw new Error('Whatsapp not found')
+    }
+
+    return result[0].countryCode ?? ''
   }
 
   async getUserFromWhatsappJid(remoteUserJid: string): Promise<User | null> {

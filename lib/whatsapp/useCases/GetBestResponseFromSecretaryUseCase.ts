@@ -6,7 +6,7 @@ import {BotSecretaryTextRequest} from "@/lib/whatsapp/models/botsecretary/BotSec
 export class GetBestResponseFromSecretaryUseCase {
   constructor(private readonly repository: WhatsappRepository) {}
 
-  async execute(userId: string, secretaryId: string, message: string): Promise<BotSecretaryResponse> {
+  async execute(userId: string, secretaryId: string, countryCode: string, message: string): Promise<BotSecretaryResponse> {
     const business = await this.repository.getBusinessWithWhatsappsFromUser(userId)
 
     const url = process.env.BOT_SERVICE_URL || '';
@@ -16,6 +16,7 @@ export class GetBestResponseFromSecretaryUseCase {
       secretaryId,
       businessId: business.id,
       whatsappIds: business.whatsapps,
+      countryCode,
       message,
     }
 

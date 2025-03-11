@@ -57,6 +57,8 @@ export interface WhatsappRepository {
 
   getConversationId(whatsappId: string, chatId: string): Promise<string | null>
 
+  getWhatsappCountryCode(whatsappId: string): Promise<string>
+
   getBusinessHours(businessLocationId: string): Promise<object>
 
   isNumberBlackListed(whatsappId:string, contactId: string): Promise<boolean>
@@ -76,6 +78,8 @@ export interface WhatsappRepository {
   updateEphemeralExpirationSecretary(secretaryId: string, userId: string, expiration: number | null): Promise<void>;
 
   isSecretaryUser(remoteUserId: string): Promise<boolean>;
+
+  getSecretaryCountryCode(secretaryId: string): Promise<string>;
 
   getUserFromWhatsappJid(remoteUserJid: string): Promise<User | null>;
 

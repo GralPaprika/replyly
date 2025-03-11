@@ -69,6 +69,7 @@ export class WhatsappApiRouteController {
       const clientId = await this.getClientId(remoteUserId)
       const source = await this.getMessageSource(data)
       const conversationId = await this.getConversationId(whatsappId, clientId)
+      const whatsappCountryCode = await this.getWhatsappCountryCode(whatsappId)
 
       if (source === MessageSource.Bot)
         return {
@@ -84,7 +85,7 @@ export class WhatsappApiRouteController {
         }
       }
 
-      return await this.respondToClient(whatsappId, conversationId, clientId, data);
+      return await this.respondToClient(whatsappId, conversationId, clientId, whatsappCountryCode, data);
 
     } catch (exception) {
       console.error(exception)
@@ -108,6 +109,7 @@ export class WhatsappApiRouteController {
 
   private async secretaryRespondToBusiness(secretaryId: string, remoteUserJid: string, data: WebHookData): Promise<RouteResponse> {
     const {fromMe, syncUpdate} = this.getMessageSourceData(data)
+    const secretaryCountryCode = await this.getSecretaryCountryCode(secretaryId)
 
     if (syncUpdate || fromMe) {
       return {
@@ -125,9 +127,9 @@ export class WhatsappApiRouteController {
     if (message) {
       result = await this.composition
         .provideGetBestResponseFromSecretaryUseCase()
-        .execute(user.id, secretaryId, message)
+        .execute(user.id, secretaryId, secretaryCountryCode, message)
     } else if (audioMessage) {
-      result = await this.getBestResponseFromSecretaryAudio(user.id, secretaryId, messageId, audioMessage)
+      result = await this.getBestResponseFromSecretaryAudio(user.id, secretaryId, messageId, secretaryCountryCode, audioMessage)
     } else {
       console.log(`Invalid message received`)
       return {
@@ -157,6 +159,7 @@ export class WhatsappApiRouteController {
     whatsappId: string,
     conversationId: string,
     clientId: string,
+    countryCode: string,
     data: WebHookData,
   ): Promise<RouteResponse> {
     const conversationStatus = await this.getConversationStatus(conversationId)
@@ -170,6 +173,7 @@ export class WhatsappApiRouteController {
         whatsappId,
         conversationId,
         clientId,
+        countryCode,
         data as WebHookData,
       )
     }
@@ -191,6 +195,7 @@ export class WhatsappApiRouteController {
     whatsappId: string,
     conversationId: string,
     clientId: string,
+    countryCode: string,
     data: WebHookData,
   ): Promise<RouteResponse> {
     await this.updateConversationStatus(conversationId, ConversationStatus.MessageReceived)
@@ -206,6 +211,7 @@ export class WhatsappApiRouteController {
       response = await this.getBestResponse({
         businessId,
         whatsappId,
+        countryCode,
         message,
         chatId: clientId,
       })
@@ -218,6 +224,7 @@ export class WhatsappApiRouteController {
         messageId,
         clientId,
         whatsappId,
+        countryCode,
         businessId,
       )
     } else {
@@ -296,6 +303,14 @@ export class WhatsappApiRouteController {
     return MessageSource.Client
   }
 
+  private async getWhatsappCountryCode(whatsappId: string): Promise<string> {
+    return await this.composition.provideGetWhatsappCountryCodeUseCase().execute(whatsappId)
+  }
+
+  private async getSecretaryCountryCode(secretaryId: string): Promise<string> {
+    return await this.composition.provideGetSecretaryCountryCodeUseCase().execute(secretaryId)
+  }
+
   private async hasActivePlan(whatsappId: string): Promise<boolean> {
     return this.composition.provideHasActivePlanUseCase().execute(whatsappId)
   }
@@ -345,6 +360,7 @@ export class WhatsappApiRouteController {
     messageId: string,
     chatId: string,
     whatsappId: string,
+    countryCode: string,
     businessId: string,
   ): Promise<string> {
     this.createPathIfNotExists(this.audioDestinationPath)
@@ -356,6 +372,7 @@ export class WhatsappApiRouteController {
       this.audioDestinationPath,
       chatId,
       whatsappId,
+      countryCode,
       businessId,
     )
   }
@@ -364,12 +381,13 @@ export class WhatsappApiRouteController {
     userId: string,
     secretaryId: string,
     messageId: string,
+    countryCode: string,
     audioMessage: AudioMessage,
   ): Promise<BotSecretaryResponse> {
     this.createPathIfNotExists(this.audioDestinationPath)
     return await this.composition
       .provideGetBestResponseFromSecretaryAudioUseCase()
-      .execute(userId, secretaryId, messageId, audioMessage, this.audioDestinationPath)
+      .execute(userId, secretaryId, countryCode, audioMessage, this.audioDestinationPath)
   }
 
   private async hasUserSecretaryPermissions(remoteUserJid: string): Promise<boolean> {
