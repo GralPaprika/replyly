@@ -9,6 +9,13 @@ import {CreateBusinessUseCase} from "@/lib/business/usecases/CreateBusinessUseCa
 import {IsValidSignUpDataUseCase} from "@/lib/auth/usecases/IsValidSignUpDataUseCase";
 import {businessDataSchema} from "@/lib/auth/models/BusinessData";
 import {ValidateFunction} from "ajv";
+import {createServerClient, GetAllCookies, SetAllCookies} from "@supabase/ssr";
+import {cookies as cookiesRepository} from "next/headers";
+import {SupabaseServerClientFactory} from "@/lib/auth/factories/SupabaseServerClientFactory";
+import {SupabaseClient} from "@supabase/supabase-js";
+import {Middleware, SessionMiddlewareFactory} from "@/lib/auth/factories/SessionMiddlewareFactory";
+import {NextRequest, NextResponse} from "next/server";
+import {SupabaseCookie} from "@/lib/auth/models/SupabaseCookie";
 
 export class AuthComposition {
   private readonly appCompositionRoot: AppComposition
@@ -33,8 +40,63 @@ export class AuthComposition {
     return this.appCompositionRoot.getSupabaseClient()
   }
 
+  private provideCookies() {
+    return cookiesRepository()
+  }
+
+  provideSupabaseServerClientFactory(): SupabaseServerClientFactory {
+    return {
+      create(getAll: GetAllCookies, setAll: SetAllCookies): SupabaseClient {
+        return createServerClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          {
+            cookies: {
+              getAll() { return getAll() },
+              setAll(cookiesToSet) { setAll(cookiesToSet) },
+            }
+          }
+        )
+      }
+    }
+  }
+
   private provideAuthRepository() {
-    return this.authRepository ??= new AuthRepositoryImpl(this.provideSupabaseClient())
+    return this.authRepository ??= new AuthRepositoryImpl(
+      this.provideSupabaseClient(),
+      this.provideCookies(),
+      this.provideSupabaseServerClientFactory(),
+    )
+  }
+
+  provideSessionMiddlewareFactory(): SessionMiddlewareFactory {
+    return {
+      create(factory: SupabaseServerClientFactory): Middleware {
+        return (request: NextRequest): NextResponse => {
+          const newResponse = () => NextResponse.next({request: {headers: request.headers}})
+          let response = newResponse()
+
+          const getAllCookies = () => {
+            return request.cookies.getAll()
+          }
+
+          const setAllCookies = (cookiesToSet: SupabaseCookie[]) => {
+            response = newResponse()
+            cookiesToSet.forEach(
+              ({name, value, options}) => {
+                request.cookies.set(name, value)
+                response.cookies.set(name, value, options)
+              }
+            )
+          }
+
+
+          const supabaseServerClient = factory.create(getAllCookies, setAllCookies)
+
+          return response
+        }
+      }
+    }
   }
 
   private provideBusinessRepository() {
