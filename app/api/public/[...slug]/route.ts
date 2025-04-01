@@ -10,7 +10,8 @@ enum ContentType {
   All = '*/*',
 }
 
-export async function GET(req: Request, { params }: { params: { slug?: string[] } }) {
+export async function GET(req: Request, props: { params: Promise<{ slug?: string[] }> }) {
+  const params = await props.params;
   try {
     const slug = params.slug || []  // ["images", "avatar", "1234567.jpg"]
     const filePath = slug ? Path.join(publicFolder, ...slug) : null

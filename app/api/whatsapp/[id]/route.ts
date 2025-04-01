@@ -10,15 +10,16 @@ import {MessageWebhookSchema} from "@/lib/whatsapp/models/webhook/MessageWebhook
  *
  * The route parameter is the whatsapp id and is used to identify a specific conversation.
  */
-export async function POST(request: Request, {params}: { params: { id: string } }) {
-  // Route parameter
-  const whatsappId = params.id
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+ const params = await props.params;
+ // Route parameter
+ const whatsappId = params.id
 
-  const webhookSchema: MessageWebhookSchema = await request.json()
+ const webhookSchema: MessageWebhookSchema = await request.json()
 
-  const controller = new WhatsappApiRouteController(WhatsappRouteComposition.provideInstance())
+ const controller = new WhatsappApiRouteController(WhatsappRouteComposition.provideInstance())
 
-  const {body, init} = await controller.processMessage(whatsappId, webhookSchema.data)
+ const {body, init} = await controller.processMessage(whatsappId, webhookSchema.data)
 
-  return NextResponse.json(body, init)
+ return NextResponse.json(body, init)
 }
