@@ -1,0 +1,1 @@
+ALTER TABLE "network" ADD COLUMN "is_registered_in_stripe" boolean DEFAULT false NOT NULL;
