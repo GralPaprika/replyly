@@ -8,12 +8,13 @@ import {pgTable, text, numeric, timestamp, boolean, uuid, integer} from 'drizzle
  */
 export const plans = pgTable('plans', {
   id: uuid('id').defaultRandom().primaryKey(),
-  name: text('name').notNull().unique(),
+  name: text('name').notNull(),
   description: text('description').notNull(),
   price: numeric('price').notNull(),
-  messagesLimit: integer ('messages_limit').notNull(),
+  messagesLimit: integer('messages_limit').notNull(),
   notificationsLimit: integer ('notifications_limit').notNull().default(0),
   regionId: uuid('region_id').notNull(),
+  currencyId: uuid('currency_id'),
   enumId: integer('enum_id').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   deleted: boolean('deleted').default(false).notNull(),

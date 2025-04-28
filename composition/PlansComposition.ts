@@ -11,6 +11,12 @@ import {addNetworkToStripeDtoSchema} from "@/lib/plans/models/network/AddNetwork
 import {IsValidAddNetworkToStripeDtoUseCase} from "@/lib/plans/usecase/network/IsValidAddNetworkToStripeDtoUseCase";
 import {IsValidCreateNetworkDtoUseCase} from "@/lib/plans/usecase/network/IsValidCreateNetworkDtoUseCase";
 import {GetNetworkByIdUseCase} from "@/lib/plans/usecase/network/GetNetworkByIdUseCase";
+import {CreatePlanUseCase} from "@/lib/plans/usecase/CreatePlanUseCase";
+import {IsValidCreatePlanDtoUseCase} from "@/lib/plans/usecase/IsValidCreatePlanDtoUseCase";
+import {createPlanDtoSchema} from "@/lib/plans/models/CreatePlanDto";
+import {GetPlanByIdUseCase} from "@/lib/plans/usecase/GetPlanByIdUseCase";
+import {SavePlanInStripeUseCase} from "@/lib/plans/usecase/SavePlanInStripeUseCase";
+import {PlanToStripeProductMapper} from "@/lib/plans/mapper/PlanToStripeProductMapper";
 
 export class PlansComposition {
   private stripe!: Stripe;
@@ -23,6 +29,11 @@ export class PlansComposition {
   private addNetworkToStripeDtoValidator!: ValidateFunction;
   private isValidAddNetworkToStripeDtoUseCase!: IsValidAddNetworkToStripeDtoUseCase;
   private getNetworkByIdUseCase!: GetNetworkByIdUseCase;
+  private createPlanUseCase!: CreatePlanUseCase;
+  private createPlanDtoValidator!: ValidateFunction;
+  private isValidCreatePlanDtoUseCase!: IsValidCreatePlanDtoUseCase;
+  private getPlanByIdUseCase!: GetPlanByIdUseCase;
+  private savePlanToStripeUseCase!: SavePlanInStripeUseCase;
 
   private constructor(private readonly appComposition: AppComposition) {}
 
@@ -71,5 +82,33 @@ export class PlansComposition {
 
   provideGetNetworkByIdUseCase(): GetNetworkByIdUseCase {
     return this.getNetworkByIdUseCase ??= new GetNetworkByIdUseCase(this.providePlansRepository())
+  }
+
+  provideCreatePlanUseCase(): CreatePlanUseCase {
+    return this.createPlanUseCase ??= new CreatePlanUseCase(this.providePlansRepository())
+  }
+
+  private provideCreatePlanDtoValidator(): ValidateFunction {
+    return this.createPlanDtoValidator ??= this.appComposition.getAjv().compile(createPlanDtoSchema)
+  }
+
+  provideIsValidCreatePlanDtoUseCase(): IsValidCreatePlanDtoUseCase {
+    return this.isValidCreatePlanDtoUseCase ??=
+      new IsValidCreatePlanDtoUseCase(this.provideCreatePlanDtoValidator())
+  }
+
+  provideGetPlanByIdUseCase(): GetPlanByIdUseCase {
+    return this.getPlanByIdUseCase ??= new GetPlanByIdUseCase(this.providePlansRepository())
+  }
+
+  private providePlanToStripeProductMapper() {
+    return PlanToStripeProductMapper
+  }
+
+  provideSavePlanInStripeUseCase(): SavePlanInStripeUseCase {
+    return this.savePlanToStripeUseCase ??= new SavePlanInStripeUseCase(
+      this.provideStripe(),
+      this.providePlanToStripeProductMapper(),
+    )
   }
 }

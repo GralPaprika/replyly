@@ -3,6 +3,7 @@ import {RouteResponse} from "@/lib/plans/models/RouteResponse";
 import {HttpResponseCode} from "@/lib/common/models/HttpResponseCode";
 import {CreateNetworkDto} from "@/lib/plans/models/network/CreateNetworkDto";
 import {AddNetworkToStripeDto} from "@/lib/plans/models/network/AddNetworkToStripeDto";
+import {CreatePlanDto} from "@/lib/plans/models/CreatePlanDto";
 
 enum ErrorMessages {
   InvalidData = "Invalid data",
@@ -36,16 +37,10 @@ export class PlansController {
 
       await this.composition.provideUpdateNetworkIsRegisteredInStripeStatusUseCase().execute(network.id, true);
 
-      return {
-        init: {status: HttpResponseCode.Ok},
-        body: {
-          data: {
-            id: network.id,
-            name: name,
-          }
-        },
-      }
-
+      return this.successResponse({
+        id: network.id,
+        name: name,
+      })
     } catch (error) {
       console.error(error);
       return ServerError
@@ -68,19 +63,39 @@ export class PlansController {
 
       await this.composition.provideUpdateNetworkIsRegisteredInStripeStatusUseCase().execute(networkId, true);
 
-      return {
-        init: {status: HttpResponseCode.Ok},
-        body: {
-          data: {
-            id: networkId,
-            name: name,
-          }
-        },
-      }
+      return this.successResponse({
+        id: networkId,
+        name: name,
+      })
     } catch (error) {
       // @ts-ignore
       console.error(error.message);
       return ServerError
+    }
+  }
+
+  async addPlan(dto: CreatePlanDto): Promise<RouteResponse> {
+    if (!this.composition.provideIsValidCreatePlanDtoUseCase().execute(dto)) {
+      return BadRequest
+    }
+
+    try {
+      const {id} = await this.composition.provideCreatePlanUseCase().execute(dto);
+      const plan = await this.composition.provideGetPlanByIdUseCase().execute(id);
+      await this.composition.provideSavePlanInStripeUseCase().execute(plan)
+
+      return this.successResponse(id)
+    } catch (error) {
+      // @ts-ignore
+      console.error(error.message);
+      return ServerError
+    }
+  }
+
+  private successResponse(data: any): RouteResponse {
+    return {
+      init: {status: HttpResponseCode.Ok},
+      body: data,
     }
   }
 }
