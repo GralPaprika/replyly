@@ -8,6 +8,7 @@ export interface Currency {
 export interface Plan {
   id: string;
   name: string;
+  displayName: string;
   description: string;
   price: string;
   messagesLimit: number;

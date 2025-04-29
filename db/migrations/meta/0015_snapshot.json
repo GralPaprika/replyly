@@ -1,6 +1,6 @@
 {
-  "id": "aecd8ca5-9dde-42c4-a6a9-33bfd92fa08d",
-  "prevId": "aaa0267c-e464-4283-b0f1-51595e0dbea1",
+  "id": "c8ed0487-01e8-456c-9764-714da49a19df",
+  "prevId": "824d5fdb-0663-49a2-94dc-f3370dea0001",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -636,18 +636,6 @@
         "region_id": {
           "name": "region_id",
           "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "currency_id": {
-          "name": "currency_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "enum_id": {
-          "name": "enum_id",
-          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },

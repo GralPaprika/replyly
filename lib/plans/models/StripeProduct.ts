@@ -6,10 +6,11 @@ export interface StripeProduct {
     messagesLimit: number;
     notificationsLimit: number;
     regionId: string;
+    replylyName: string;
   };
   default_price_data: {
     currency: string;
-    amount: number;
+    unit_amount: number;
     recurring: {
       interval: string;
       interval_count: number;

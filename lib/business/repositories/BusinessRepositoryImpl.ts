@@ -28,13 +28,7 @@ export class BusinessRepositoryImpl implements BusinessRepository {
     return result[0].id
   }
 
-  async addPlan(businessId: string, planValue: number): Promise<void> {
-    const planId = (await this.db
-      .select({id: plans.id})
-      .from(plans)
-      .where(and(eq(plans.enumId, planValue), isFalse(plans.deleted)))
-      .execute())[0].id
-
+  async addPlan(businessId: string, planId: string): Promise<void> {
     const now = sql`now()`
     const nowPlusOneMonth = sql`now() + interval '1 month'`
 

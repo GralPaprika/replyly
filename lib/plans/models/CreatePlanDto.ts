@@ -1,24 +1,26 @@
 export interface CreatePlanDto {
   name: string;
+  displayName: string;
   description: string;
   price: string;
   messagesLimit: number;
   notificationsLimit: number;
   regionId: string;
-  enumId: number;
+  currencyId: number;
 }
 
 export const createPlanDtoSchema = {
   type: 'object',
   properties: {
     name: { type: 'string' },
+    displayName: { type: 'string' },
     description: { type: 'string' },
     price: { type: 'string' },
     messagesLimit: { type: 'number' },
     notificationsLimit: { type: 'number' },
     regionId: { type: 'string' },
-    enumId: { type: 'number' },
+    currencyId: { type: 'number' },
   },
-  required: ['name', 'description', 'price', 'messagesLimit', 'notificationsLimit', 'regionId', 'enumId'],
+  required: ['name', 'displayName', 'description', 'price', 'messagesLimit', 'notificationsLimit', 'regionId', 'currencyId'],
   additionalProperties: false,
 }

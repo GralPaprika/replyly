@@ -59,6 +59,7 @@ export class PlansRepositoryImpl implements PlansRepository {
       .select({
         id: plans.id,
         name: plans.name,
+        displayName: plans.displayName,
         description: plans.description,
         price: plans.price,
         currency: {

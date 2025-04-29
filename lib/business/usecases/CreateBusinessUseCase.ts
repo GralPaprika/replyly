@@ -6,6 +6,8 @@ import {Networks} from "@/lib/common/Networks";
 import {BusinessCreatedData} from "@/lib/business/models/BusinessCreatedData";
 import {Exception} from "@/lib/common/models/Exception";
 
+const DEFAULT_PLAN_ID = '3131a73c-6807-494f-91f4-b32fdafa9e22';
+
 export class CreateBusinessUseCaseException implements Exception {
   constructor(readonly message: string) {}
 }
@@ -17,7 +19,7 @@ export class CreateBusinessUseCase {
     try {
       const businessId = await this.repository.createBusiness(data);
 
-      await this.repository.addPlan(businessId, Plans.Demo);
+      await this.repository.addPlan(businessId, DEFAULT_PLAN_ID);
 
       const adminName = `${data.businessName.replace(' ', '-')}-admin`
       const adminId = await this.repository.addAdmin({

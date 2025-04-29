@@ -5,7 +5,7 @@ import {SlimBusinessDto} from "@/lib/business/models/SlimBusinessDto";
 
 export interface BusinessRepository {
   createBusiness(business: BusinessData): Promise<string>;
-  addPlan(businessId: string, planValue: number): Promise<void>;
+  addPlan(businessId: string, planId: string): Promise<void>;
   addAdmin(user: BusinessUser): Promise<string>;
   addLocation(location: BusinessLocation): Promise<string>;
   addUserToLocation(locationId: string, userId: string): Promise<void>;
