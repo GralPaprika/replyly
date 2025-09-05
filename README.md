@@ -1,4 +1,22 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Replyly – Core Service & Web App
+
+Backend for client creation and WhatsApp message routing to the correct AI assistant, plus the web frontend to buy plans, manage your account, and view chats.
+
+## ✨ What this repo does
+
+- **Client onboarding & plans**  
+  Create accounts, select a plan, enforce quotas/limits, and manage billing state.
+
+- **WhatsApp message routing**  
+  Receive messages, resolve the target **business AI assistant**, generate a reply, and deliver it back to WhatsApp.
+
+- **Web frontend**  
+  Pages to **purchase plans**, **manage account**, and **view/search chats** from the browser.
+
+- **Message storage & controls**  
+  Persist inbound/outbound messages. Mark phone numbers that should **not** trigger the bot.
+
+> This repo **does not** train models. It connects messages to an already configured AI assistant per client.
 
 ## Getting Started
 
